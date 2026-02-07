@@ -1,0 +1,175 @@
+# PowerConfig - Ultimate PowerShell Configuration
+# https://github.com/thepinak503/powerconfig
+# Version: 1.0.0
+
+#region Configuration
+$env:POWERCONFIG_VERSION = "1.0.0"
+$env:POWERCONFIG_MODE = if ($env:POWERCONFIG_MODE) { $env:POWERCONFIG_MODE } else { "advanced" }
+$env:POWERCONFIG_DIR = "$env:USERPROFILE\.powerconfig"
+#endregion
+
+#region Core Environment
+# Editor preference
+if (Get-Command code -ErrorAction SilentlyContinue) {
+    $env:EDITOR = "code"
+    $env:VISUAL = "code"
+} elseif (Get-Command nvim -ErrorAction SilentlyContinue) {
+    $env:EDITOR = "nvim"
+    $env:VISUAL = "nvim"
+} elseif (Get-Command vim -ErrorAction SilentlyContinue) {
+    $env:EDITOR = "vim"
+    $env:VISUAL = "vim"
+} else {
+    $env:EDITOR = "notepad"
+    $env:VISUAL = "notepad"
+}
+
+# Locale
+$env:LANG = "en_US.UTF-8"
+
+# Disable annoying prompts
+$env:VIRTUAL_ENV_DISABLE_PROMPT = "1"
+$env:PYTHONDONTWRITEBYTECODE = "1"
+$env:NODE_NO_WARNINGS = "1"
+#endregion
+
+#region PATH Management
+$PathAdditions = @(
+    "$env:USERPROFILE\.local\bin"
+    "$env:USERPROFILE\.cargo\bin"
+    "$env:USERPROFILE\.dotnet\tools"
+    "$env:USERPROFILE\.npm-global\bin"
+    "$env:USERPROFILE\.poetry\bin"
+    "$env:USERPROFILE\go\bin"
+    "$env:USERPROFILE\scoop\shims"
+    "$env:USERPROFILE\scoop\apps\git\current\bin"
+    "$env:USERPROFILE\scoop\apps\python\current"
+    "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps"
+    "$env:USERPROFILE\AppData\Roaming\Python\Scripts"
+    "C:\Program Files\nodejs"
+    "C:\ProgramData\chocolatey\bin"
+)
+
+foreach ($Path in $PathAdditions) {
+    if ((Test-Path $Path) -and ($env:Path -notlike "*$Path*")) {
+        $env:Path = "$Path;$env:Path"
+    }
+}
+#endregion
+
+#region Load PowerConfig Components
+$ComponentPath = "$env:POWERCONFIG_DIR\Modules"
+
+# Load Aliases
+$AliasesFile = "$ComponentPath\Aliases.ps1"
+if (Test-Path $AliasesFile) { . $AliasesFile }
+
+# Load Functions
+$FunctionsFile = "$ComponentPath\Functions.ps1"
+if (Test-Path $FunctionsFile) { . $FunctionsFile }
+
+# Load Package Managers (Scoop, Chocolatey, Winget)
+$PkgFile = "$ComponentPath\PackageManagers.ps1"
+if (Test-Path $PkgFile) { . $PkgFile }
+
+# Load Development Tools
+if ($env:POWERCONFIG_MODE -ne "basic") {
+    $DevFile = "$ComponentPath\Development.ps1"
+    if (Test-Path $DevFile) { . $DevFile }
+}
+
+# Load Modern Tools
+if ($env:POWERCONFIG_MODE -ne "basic") {
+    $ToolsFile = "$ComponentPath\ModernTools.ps1"
+    if (Test-Path $ToolsFile) { . $ToolsFile }
+}
+
+# Load Windows-Specific
+if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+    $WinFile = "$ComponentPath\Windows.ps1"
+    if (Test-Path $WinFile) { . $WinFile }
+}
+#endregion
+
+#region Modern Tool Initialization
+# Starship Prompt
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    Invoke-Expression (&starship init powershell)
+}
+
+# Zoxide
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
+# FZF
+if (Get-Command fzf -ErrorAction SilentlyContinue) {
+    $FzfPath = if (Test-Path "$env:USERPROFILE\scoop\apps\fzf\current") {
+        "$env:USERPROFILE\scoop\apps\fzf\current"
+    } else {
+        (Get-Command fzf).Source | Split-Path
+    }
+    
+    $FzfBindings = "$FzfPath\shell\key-bindings.ps1"
+    if (Test-Path $FzfBindings) { . $FzfBindings }
+}
+
+# PSReadLine Configuration
+if (Get-Module PSReadLine -ListAvailable) {
+    Import-Module PSReadLine
+    Set-PSReadLineOption -EditMode Windows
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle ListView
+    Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+}
+
+# Terminal-Icons
+if (Get-Module Terminal-Icons -ListAvailable) {
+    Import-Module Terminal-Icons
+}
+#endregion
+
+#region Custom Prompt (if no Starship)
+if (-not (Get-Command starship -ErrorAction SilentlyContinue)) {
+    function prompt {
+        $location = Get-Location
+        $branch = ""
+        
+        # Git branch
+        try {
+            $branch = git branch --show-current 2>$null
+            if ($branch) { $branch = " ($branch)" }
+        } catch {}
+        
+        # Status indicator
+        $status = if ($?) { "✓" } else { "✗" }
+        $statusColor = if ($?) { "Green" } else { "Red" }
+        
+        # Build prompt
+        Write-Host "$status " -NoNewline -ForegroundColor $statusColor
+        Write-Host "$env:USERNAME@$env:COMPUTERNAME " -NoNewline -ForegroundColor Cyan
+        Write-Host "$location" -NoNewline -ForegroundColor Yellow
+        if ($branch) {
+            Write-Host "$branch" -NoNewline -ForegroundColor Magenta
+        }
+        Write-Host "`n> " -NoNewline
+        return " "
+    }
+}
+#endregion
+
+#region Welcome Message
+switch ($env:POWERCONFIG_MODE) {
+    "ultra-nerd" { Write-Host "✓ PowerConfig loaded in ULTRA-NERD mode" -ForegroundColor Green }
+    "basic" { Write-Host "✓ PowerConfig loaded in BASIC mode" -ForegroundColor Blue }
+    default { Write-Host "✓ PowerConfig loaded in ADVANCED mode" -ForegroundColor DarkYellow }
+}
+#endregion
+
+#region Local Customizations
+$LocalProfile = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.local.ps1"
+if (Test-Path $LocalProfile) { . $LocalProfile }
+#endregion

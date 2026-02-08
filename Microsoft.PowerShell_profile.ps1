@@ -2,10 +2,15 @@
 # https://github.com/thepinak503/powerconfig
 # Version: 1.0.0
 
-#region Configuration
+#region Cross-Platform Configuration
 $env:POWERCONFIG_VERSION = "1.0.0"
 $env:POWERCONFIG_MODE = if ($env:POWERCONFIG_MODE) { $env:POWERCONFIG_MODE } else { "advanced" }
-$env:POWERCONFIG_DIR = "$env:USERPROFILE\.powerconfig"
+
+if ($IsWindows) {
+    $env:POWERCONFIG_DIR = "$env:USERPROFILE\.powerconfig"
+} else {
+    $env:POWERCONFIG_DIR = "$env:HOME/.powerconfig"
+}
 #endregion
 
 #region Core Environment
@@ -33,21 +38,25 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 $env:NODE_NO_WARNINGS = "1"
 #endregion
 
-#region PATH Management
+#region Cross-Platform PATH Management
 $PathAdditions = @(
-    "$env:USERPROFILE\.local\bin"
-    "$env:USERPROFILE\.cargo\bin"
-    "$env:USERPROFILE\.dotnet\tools"
-    "$env:USERPROFILE\.npm-global\bin"
-    "$env:USERPROFILE\.poetry\bin"
-    "$env:USERPROFILE\go\bin"
-    "$env:USERPROFILE\scoop\shims"
-    "$env:USERPROFILE\scoop\apps\git\current\bin"
-    "$env:USERPROFILE\scoop\apps\python\current"
-    "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps"
-    "$env:USERPROFILE\AppData\Roaming\Python\Scripts"
-    "C:\Program Files\nodejs"
-    "C:\ProgramData\chocolatey\bin"
+    "$env:HOME/.local/bin",
+    "$env:HOME/.cargo/bin",
+    "$env:HOME/.dotnet/tools",
+    "$env:HOME/.npm-global/bin",
+    "$env:HOME/.poetry/bin",
+    "$env:HOME/go/bin",
+    "$env:HOME/scoop/shims",
+    "$env:HOME/scoop/apps/git/current/bin",
+    "$env:HOME/scoop/apps/python/current",
+    "$env:HOME/AppData/Local/Microsoft/WindowsApps",
+    "$env:HOME/AppData/Roaming/Python/Scripts",
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/local/sbin",
+    "/usr/sbin",
+    "/sbin"
 )
 
 foreach ($Path in $PathAdditions) {
@@ -68,7 +77,7 @@ if (Test-Path $AliasesFile) { . $AliasesFile }
 $FunctionsFile = "$ComponentPath\Functions.ps1"
 if (Test-Path $FunctionsFile) { . $FunctionsFile }
 
-# Load Package Managers (Scoop, Chocolatey, Winget)
+# Load Package Managers
 $PkgFile = "$ComponentPath\PackageManagers.ps1"
 if (Test-Path $PkgFile) { . $PkgFile }
 
@@ -84,11 +93,9 @@ if ($env:POWERCONFIG_MODE -ne "basic") {
     if (Test-Path $ToolsFile) { . $ToolsFile }
 }
 
-# Load Windows-Specific
-if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
-    $WinFile = "$ComponentPath\Windows.ps1"
-    if (Test-Path $WinFile) { . $WinFile }
-}
+# Load Cross-Platform System
+$WinFile = "$ComponentPath\Windows.ps1"
+if (Test-Path $WinFile) { . $WinFile }
 #endregion
 
 #region Modern Tool Initialization
@@ -170,6 +177,10 @@ switch ($env:POWERCONFIG_MODE) {
 #endregion
 
 #region Local Customizations
-$LocalProfile = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.local.ps1"
+if ($IsWindows) {
+    $LocalProfile = "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.local.ps1"
+} else {
+    $LocalProfile = "$env:HOME/.config/powershell/Microsoft.PowerShell_profile.local.ps1"
+}
 if (Test-Path $LocalProfile) { . $LocalProfile }
 #endregion

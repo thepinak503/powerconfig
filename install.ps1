@@ -16,10 +16,31 @@ $Cyan = "`e[0;36m"
 $White = "`e[1;37m"
 $Reset = "`e[0m"
 
-# Configuration
+# Platform Detection
+$IsWindows = $false
+$IsMacOS = $false
+$IsLinux = $false
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $IsWindows = $true
+} else {
+    $IsWindows = $IsWindows
+    $IsMacOS = $IsMacOS
+    $IsLinux = $IsLinux
+}
+
+# Cross-platform Configuration
 $RepoUrl = "https://github.com/thepinak503/powerconfig"
-$InstallDir = "$env:USERPROFILE\.powerconfig"
-$BackupDir = "$env:USERPROFILE\.powerconfig-backup-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+
+if ($IsWindows) {
+    $InstallDir = "$env:USERPROFILE\.powerconfig"
+    $BackupDir = "$env:USERPROFILE\.powerconfig-backup-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+    $ProfilePath = $PROFILE
+} else {
+    $InstallDir = "$env:HOME\.powerconfig"
+    $BackupDir = "$env:HOME/.powerconfig-backup-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+    $ProfilePath = "$env:HOME/.config/powershell/Microsoft.PowerShell_profile.ps1"
+}
 
 function Print-Header {
     Write-Host @"
@@ -70,26 +91,63 @@ function Detect-PackageManagers {
     
     $managers = @()
     
-    if (Get-Command scoop -ErrorAction SilentlyContinue) {
-        $managers += "Scoop"
-        Print-Info "✓ Scoop detected"
-    }
-    
-    if (Get-Command choco -ErrorAction SilentlyContinue) {
-        $managers += "Chocolatey"
-        Print-Info "✓ Chocolatey detected"
-    }
-    
-    if (Get-Command winget -ErrorAction SilentlyContinue) {
-        $managers += "Winget"
-        Print-Info "✓ Winget detected"
-    }
-    
-    if ($managers.Count -eq 0) {
-        Print-Warning "No package managers found"
-        Print-Info "Install Scoop: iwr -useb get.scoop.sh | iex"
-        Print-Info "Or Chocolatey: https://chocolatey.org/install"
+    if ($IsWindows) {
+        if (Get-Command scoop -ErrorAction SilentlyContinue) {
+            $managers += "Scoop"
+            Print-Info "✓ Scoop detected"
+        }
+        
+        if (Get-Command choco -ErrorAction SilentlyContinue) {
+            $managers += "Chocolatey"
+            Print-Info "✓ Chocolatey detected"
+        }
+        
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            $managers += "Winget"
+            Print-Info "✓ Winget detected"
+        }
+        
+        if ($managers.Count -eq 0) {
+            Print-Warning "No Windows package managers found"
+            Print-Info "Install Scoop: iwr -useb get.scoop.sh | iex"
+            Print-Info "Or Chocolatey: https://chocolatey.org/install"
+        }
+    } elseif ($IsMacOS) {
+        if (Get-Command brew -ErrorAction SilentlyContinue) {
+            $managers += "Homebrew"
+            Print-Info "✓ Homebrew detected"
+        }
+        
+        if ($managers.Count -eq 0) {
+            Print-Warning "No package managers found"
+            Print-Info "Install Homebrew: /bin/bash -c '\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)'"
+        }
     } else {
+        # Linux
+        if (Get-Command apt -ErrorAction SilentlyContinue) {
+            $managers += "APT"
+            Print-Info "✓ APT detected"
+        }
+        if (Get-Command dnf -ErrorAction SilentlyContinue) {
+            $managers += "DNF"
+            Print-Info "✓ DNF detected"
+        }
+        if (Get-Command pacman -ErrorAction SilentlyContinue) {
+            $managers += "Pacman"
+            Print-Info "✓ Pacman detected"
+        }
+        if (Get-Command snap -ErrorAction SilentlyContinue) {
+            $managers += "Snap"
+            Print-Info "✓ Snap detected"
+        }
+        
+        if ($managers.Count -eq 0) {
+            Print-Warning "No Linux package managers found"
+            Print-Info "Install packages using your distribution's package manager"
+        }
+    }
+    
+    if ($managers.Count -gt 0) {
         Print-Success "Found: $($managers -join ', ')"
     }
 }

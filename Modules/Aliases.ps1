@@ -85,37 +85,38 @@ function reload { . $PROFILE }
 Set-Alias -Name df -Value Get-Volume
 Set-Alias -Name ps -Value Get-Process
 Set-Alias -Name top -Value Get-Process
-Set-Alias -Name env -Value Get-ChildItem -ArgumentList Env:
+function env { Get-ChildItem Env: }
 #endregion
 
 #region Git
 Set-Alias -Name g -Value git
-Set-Alias -Name ga -Value git -ArgumentList "add"
-Set-Alias -Name gaa -Value git -ArgumentList "add", "--all"
-Set-Alias -Name gb -Value git -ArgumentList "branch"
-Set-Alias -Name gba -Value git -ArgumentList "branch", "-a"
-Set-Alias -Name gc -Value git -ArgumentList "commit"
-Set-Alias -Name gcm -Value git -ArgumentList "commit", "-m"
-Set-Alias -Name gcam -Value git -ArgumentList "commit", "-am"
-Set-Alias -Name gco -Value git -ArgumentList "checkout"
-Set-Alias -Name gcb -Value git -ArgumentList "checkout", "-b"
-Set-Alias -Name gd -Value git -ArgumentList "diff"
-Set-Alias -Name gds -Value git -ArgumentList "diff", "--staged"
-Set-Alias -Name gf -Value git -ArgumentList "fetch"
-Set-Alias -Name gl -Value git -ArgumentList @("log", "--oneline", "--graph", "--decorate")
-Set-Alias -Name glog -Value git -ArgumentList @("log", "--oneline", "--graph", "--decorate", "--all")
-Set-Alias -Name gm -Value git -ArgumentList "merge"
-Set-Alias -Name gp -Value git -ArgumentList "push"
-Set-Alias -Name gpf -Value git -ArgumentList "push", "--force-with-lease"
-Set-Alias -Name gpl -Value git -ArgumentList "pull"
-Set-Alias -Name gr -Value git -ArgumentList "remote", "-v"
-Set-Alias -Name grb -Value git -ArgumentList "rebase"
-Set-Alias -Name grbi -Value git -ArgumentList "rebase", "-i"
-Set-Alias -Name gs -Value git -ArgumentList @("status", "-sb")
-Set-Alias -Name gst -Value git -ArgumentList "stash"
-Set-Alias -Name gstp -Value git -ArgumentList "stash", "pop"
-Set-Alias -Name gsta -Value git -ArgumentList "stash", "apply"
-Set-Alias -Name gstl -Value git -ArgumentList "stash", "list"
+
+function ga { git add @args }
+function gaa { git add --all @args }
+function gb { git branch @args }
+function gba { git branch -a @args }
+function gc { git commit @args }
+function gcm { git commit -m @args }
+function gcam { git commit -am @args }
+function gco { git checkout @args }
+function gcb { git checkout -b @args }
+function gd { git diff @args }
+function gds { git diff --staged @args }
+function gf { git fetch @args }
+function gl { git log --oneline --graph --decorate @args }
+function glog { git log --oneline --graph --decorate --all @args }
+function gm { git merge @args }
+function gp { git push @args }
+function gpf { git push --force-with-lease @args }
+function gpl { git pull @args }
+function gr { git remote -v @args }
+function grb { git rebase @args }
+function grbi { git rebase -i @args }
+function gs { git status -sb @args }
+function gst { git stash @args }
+function gstp { git stash pop @args }
+function gsta { git stash apply @args }
+function gstl { git stash list @args }
 
 function gcl { git clone $args }
 function gcp { git cherry-pick $args }
@@ -238,18 +239,18 @@ function popub { poetry publish $args }
 #endregion
 
 #region Node.js
-Set-Alias -Name nr -Value npm -ArgumentList "run"
-Set-Alias -Name ns -Value npm -ArgumentList "start"
-Set-Alias -Name nb -Value npm -ArgumentList "run", "build"
-Set-Alias -Name nt -Value npm -ArgumentList "test"
-Set-Alias -Name ni -Value npm -ArgumentList "install"
-Set-Alias -Name nid -Value npm -ArgumentList "install", "--save-dev"
-Set-Alias -Name nig -Value npm -ArgumentList "install", "-g"
-Set-Alias -Name nu -Value npm -ArgumentList "uninstall"
-Set-Alias -Name nup -Value npm -ArgumentList "update"
-Set-Alias -Name nls -Value npm -ArgumentList "list", "--depth=0"
-Set-Alias -Name nout -Value npm -ArgumentList "outdated"
-Set-Alias -Name nci -Value npm -ArgumentList "ci"
+function nr { npm run @args }
+function ns { npm start @args }
+function nb { npm run build @args }
+function nt { npm test @args }
+function ni { npm install @args }
+function nid { npm install --save-dev @args }
+function nig { npm install -g @args }
+function nu { npm uninstall @args }
+function nup { npm update @args }
+function nls { npm list --depth=0 @args }
+function nout { npm outdated @args }
+function nci { npm ci @args }
 
 # Yarn
 function yr { yarn run $args }
@@ -291,15 +292,110 @@ function goi { go install $args }
 function gog { go get $args }
 #endregion
 
-#region Windows Utilities
-if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+#region Cross-Platform Utilities
+# Platform detection
+$IsWindows = $false
+$IsMacOS = $false
+$IsLinux = $false
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $IsWindows = $true
+} else {
+    $IsWindows = $IsWindows
+    $IsMacOS = $IsMacOS
+    $IsLinux = $IsLinux
+}
+
+# Cross-platform editor aliases
+if (Get-Command code -ErrorAction SilentlyContinue) {
+    Set-Alias -Name v -Value code
+    Set-Alias -Name vi -Value code
+    Set-Alias -Name vim -Value code
+} elseif (Get-Command nvim -ErrorAction SilentlyContinue) {
+    Set-Alias -Name v -Value nvim
+    Set-Alias -Name vi -Value nvim
+    Set-Alias -Name vim -Value nvim
+} elseif (Get-Command vim -ErrorAction SilentlyContinue) {
+    Set-Alias -Name v -Value vim
+    Set-Alias -Name vi -Value vim
+    Set-Alias -Name vim -Value vim
+} else {
+    if ($IsWindows) {
+        Set-Alias -Name v -Value notepad
+        Set-Alias -Name vi -Value notepad
+        Set-Alias -Name vim -Value notepad
+    } else {
+        Set-Alias -Name v -Value nano
+        Set-Alias -Name vi -Value vi
+        Set-Alias -Name vim -Value vi
+    }
+}
+
+# Cross-platform file manager
+function explore {
+    param([string]$Path = ".")
+    
+    if ($IsWindows) {
+        explorer.exe $Path
+    } elseif ($IsMacOS) {
+        open $Path
+    } else {
+        if (Get-Command xdg-open -ErrorAction SilentlyContinue) {
+            xdg-open $Path
+        } else {
+            Write-Error "No suitable file manager found"
+        }
+    }
+}
+
+# Cross-platform hosts file editor
+function hosts {
+    if ($IsWindows) {
+        & $env:EDITOR "C:\Windows\System32\drivers\etc\hosts"
+    } elseif ($IsMacOS) {
+        & $env:EDITOR "/etc/hosts"
+    } else {
+        sudo & $env:EDITOR "/etc/hosts"
+    }
+}
+
+# Cross-platform trash emptying
+function emptytrash {
+    if ($IsWindows) {
+        Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+        Write-Host "Recycle Bin emptied" -ForegroundColor Green
+    } elseif ($IsMacOS) {
+        osascript -e 'tell application "Finder" to empty trash'
+        Write-Host "Trash emptied" -ForegroundColor Green
+    } else {
+        Write-Host "Linux trash emptying not implemented" -ForegroundColor Yellow
+    }
+}
+
+# Cross-platform recycle/trash access
+function recycle {
+    if ($IsWindows) {
+        explorer.exe shell:RecycleBinFolder
+    } elseif ($IsMacOS) {
+        open ~/.Trash
+    } else {
+        if (Test-Path ~/.local/share/Trash) {
+            explore ~/.local/share/Trash
+        } else {
+            Write-Error "Trash directory not found"
+        }
+    }
+}
+#endregion
+
+#region Windows-Specific Utilities
+if ($IsWindows) {
     Set-Alias -Name explorer -Value explorer.exe
     Set-Alias -Name notepad -Value notepad.exe
     Set-Alias -Name calc -Value calc.exe
     Set-Alias -Name taskmgr -Value taskmgr.exe
     Set-Alias -Name mspaint -Value mspaint.exe
     
-    function hosts { notepad C:\Windows\System32\drivers\etc\hosts }
     function services { services.msc }
     function envvars { rundll32 sysdm.cpl,EditEnvironmentVariables }
     function firewall { wf.msc }
@@ -312,8 +408,47 @@ if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
     function sysdm { sysdm.cpl }
     function winver { winver.exe }
     
-    function emptytrash { Clear-RecycleBin -Force }
-    function recycle { explorer shell:RecycleBinFolder }
+    Write-Host "✓ Windows-specific aliases loaded" -ForegroundColor DarkGray
+}
+#endregion
+
+#region macOS-Specific Utilities
+if ($IsMacOS) {
+    function show-hidden-files {
+        defaults write com.apple.finder AppleShowAllFiles YES
+        killall Finder
+        Write-Host "Hidden files shown" -ForegroundColor Green
+    }
+
+    function hide-hidden-files {
+        defaults write com.apple.finder AppleShowAllFiles NO
+        killall Finder
+        Write-Host "Hidden files hidden" -ForegroundColor Green
+    }
+
+    function lock-screen {
+        /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend
+    }
+
+    Write-Host "✓ macOS-specific aliases loaded" -ForegroundColor DarkGray
+}
+#endregion
+
+#region Linux-Specific Utilities
+if ($IsLinux) {
+    function apt-update {
+        sudo apt update && sudo apt upgrade -y
+    }
+
+    function dnf-update {
+        sudo dnf update -y
+    }
+
+    function pacman-update {
+        sudo pacman -Syu --noconfirm
+    }
+
+    Write-Host "✓ Linux-specific aliases loaded" -ForegroundColor DarkGray
 }
 #endregion
 

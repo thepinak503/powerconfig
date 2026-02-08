@@ -414,7 +414,12 @@ function mkvenv {
     param([string]$Name = "venv")
     
     python -m venv $Name
-    .\$Name\Scripts\Activate.ps1
+    
+    if ($IsWindows) {
+        & ".\$Name\Scripts\Activate.ps1"
+    } else {
+        & ".\$Name/bin/activate"
+    }
 }
 
 function passgen {
@@ -465,7 +470,13 @@ function urlencode {
     #>
     param([Parameter(Mandatory)][string]$String)
     
-    [System.Web.HttpUtility]::UrlEncode($String)
+    if ($IsWindows) {
+        [System.Web.HttpUtility]::UrlEncode($String)
+    } else {
+        # Cross-platform URL encoding
+        Add-Type -AssemblyName System.Web
+        [System.Web.HttpUtility]::UrlEncode($String)
+    }
 }
 
 function urldecode {
@@ -477,7 +488,13 @@ function urldecode {
     #>
     param([Parameter(Mandatory)][string]$String)
     
-    [System.Web.HttpUtility]::UrlDecode($String)
+    if ($IsWindows) {
+        [System.Web.HttpUtility]::UrlDecode($String)
+    } else {
+        # Cross-platform URL decoding
+        Add-Type -AssemblyName System.Web
+        [System.Web.HttpUtility]::UrlDecode($String)
+    }
 }
 
 function docker-clean {
@@ -501,22 +518,58 @@ function docker-clean {
 }
 #endregion
 
+#region Platform Detection
+$IsWindows = $false
+$IsMacOS = $false
+$IsLinux = $false
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $IsWindows = $true
+} else {
+    $IsWindows = $IsWindows
+    $IsMacOS = $IsMacOS
+    $IsLinux = $IsLinux
+}
+
+function Get-HomePath {
+    if ($IsWindows) {
+        return $env:USERPROFILE
+    } else {
+        return $env:HOME
+    }
+}
+
+function Get-TempPath {
+    if ($IsWindows) {
+        return $env:TEMP
+    } else {
+        return "/tmp"
+    }
+}
+#endregion
+
 #region System Utilities
 function sysinfo {
     <#
     .SYNOPSIS
         Display system information
     #>
-    $info = Get-ComputerInfo
-    
-    [PSCustomObject]@{
-        "OS" = $info.WindowsProductName
-        "Version" = $info.WindowsVersion
-        "Architecture" = $info.OsArchitecture
-        "Total RAM" = "{0:N2} GB" -f ($info.TotalPhysicalMemory / 1GB)
-        "Processors" = $info.CsProcessors.Count
-        "Boot Time" = $info.OsLastBootUpTime
-    } | Format-List
+    if ($IsWindows) {
+        $info = Get-ComputerInfo
+        [PSCustomObject]@{
+            "OS" = $info.WindowsProductName
+            "Version" = $info.WindowsVersion
+            "Architecture" = $info.OsArchitecture
+            "Total RAM" = "{0:N2} GB" -f ($info.TotalPhysicalMemory / 1GB)
+            "Processors" = $info.CsProcessors.Count
+            "Boot Time" = $info.OsLastBootUpTime
+        } | Format-List
+    } elseif ($IsMacOS) {
+        system_profiler SPHardwareDataType | Select-String "Model Name", "Processor", "Memory", "System Serial Number"
+    } else {
+        lscpu | Select-String "Model name", "CPU(s)", "Memory"
+        free -h
+    }
 }
 
 function diskusage {
@@ -524,14 +577,18 @@ function diskusage {
     .SYNOPSIS
         Display disk usage
     #>
-    Get-Volume | 
-        Where-Object { $_.DriveLetter } |
-        Select-Object DriveLetter, 
-            @{Name="Size(GB)";Expression={[math]::Round($_.Size / 1GB, 2)}},
-            @{Name="Used(GB)";Expression={[math]::Round(($_.Size - $_.SizeRemaining) / 1GB, 2)}},
-            @{Name="Free(GB)";Expression={[math]::Round($_.SizeRemaining / 1GB, 2)}},
-            @{Name="Usage";Expression={[math]::Round((($_.Size - $_.SizeRemaining) / $_.Size) * 100, 1)}} |
-        Format-Table -AutoSize
+    if ($IsWindows) {
+        Get-Volume | 
+            Where-Object { $_.DriveLetter } |
+            Select-Object DriveLetter, 
+                @{Name="Size(GB)";Expression={[math]::Round($_.Size / 1GB, 2)}},
+                @{Name="Used(GB)";Expression={[math]::Round(($_.Size - $_.SizeRemaining) / 1GB, 2)}},
+                @{Name="Free(GB)";Expression={[math]::Round($_.SizeRemaining / 1GB, 2)}},
+                @{Name="Usage";Expression={[math]::Round((($_.Size - $_.SizeRemaining) / $_.Size) * 100, 1)}} |
+            Format-Table -AutoSize
+    } else {
+        df -h
+    }
 }
 
 function uptime {
@@ -539,24 +596,35 @@ function uptime {
     .SYNOPSIS
         Show system uptime
     #>
-    $bootTime = (Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-    Write-Host "System uptime: $($bootTime.Days) days, $($bootTime.Hours) hours, $($bootTime.Minutes) minutes"
+    if ($IsWindows) {
+        $bootTime = (Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+        Write-Host "System uptime: $($bootTime.Days) days, $($bootTime.Hours) hours, $($bootTime.Minutes) minutes"
+    } else {
+        uptime
+    }
 }
 
 function emptybin {
     <#
     .SYNOPSIS
-        Empty Recycle Bin
+        Empty Recycle Bin/Trash
     #>
-    Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-    Write-Host "Recycle Bin emptied" -ForegroundColor Green
+    if ($IsWindows) {
+        Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+        Write-Host "Recycle Bin emptied" -ForegroundColor Green
+    } elseif ($IsMacOS) {
+        osascript -e 'tell application "Finder" to empty trash'
+        Write-Host "Trash emptied" -ForegroundColor Green
+    } else {
+        Write-Host "Linux trash emptying not implemented" -ForegroundColor Yellow
+    }
 }
 #endregion
 
 #region Quick Access
-function docs { Set-Location $env:USERPROFILE\Documents }
-function desktop { Set-Location $env:USERPROFILE\Desktop }
-function downloads { Set-Location $env:USERPROFILE\Downloads }
-function home { Set-Location $env:USERPROFILE }
-function tmp { Set-Location $env:TEMP }
+function docs { Set-Location (Join-Path (Get-HomePath) "Documents") }
+function desktop { Set-Location (Join-Path (Get-HomePath) "Desktop") }
+function downloads { Set-Location (Join-Path (Get-HomePath) "Downloads") }
+function home { Set-Location (Get-HomePath) }
+function tmp { Set-Location (Get-TempPath) }
 #endregion

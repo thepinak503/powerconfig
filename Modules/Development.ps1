@@ -1,10 +1,31 @@
 # PowerConfig Development Tools
 # Python, Node.js, Rust, Go, Docker, Kubernetes, Terraform
 
+#region Platform Detection
+$IsWindows = $false
+$IsMacOS = $false
+$IsLinux = $false
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $IsWindows = $true
+} else {
+    $IsWindows = $IsWindows
+    $IsMacOS = $IsMacOS
+    $IsLinux = $IsLinux
+}
+#endregion
+
 #region Python
-Set-Alias -Name py -Value python
-Set-Alias -Name py3 -Value python3
-Set-Alias -Name pip -Value pip3
+# Cross-platform Python aliases
+if (Get-Command python3 -ErrorAction SilentlyContinue) {
+    Set-Alias -Name py -Value python3
+    Set-Alias -Name py3 -Value python3
+    Set-Alias -Name pip -Value pip3
+} elseif (Get-Command python -ErrorAction SilentlyContinue) {
+    Set-Alias -Name py -Value python
+    Set-Alias -Name py3 -Value python
+    Set-Alias -Name pip -Value pip
+}
 
 function pipi { pip install $args }
 function pipu { pip install --upgrade $args }
@@ -18,7 +39,17 @@ function venv {
     param([string]$Name = "venv")
     python -m venv $Name 
 }
-function venva { .\venv\Scripts\Activate.ps1 }
+
+function venva { 
+    param([string]$Name = "venv")
+    
+    if ($IsWindows) {
+        & ".\$Name\Scripts\Activate.ps1"
+    } else {
+        & ".\$Name/bin/activate"
+    }
+}
+
 function venvd { deactivate }
 
 # Poetry
@@ -45,18 +76,18 @@ function cel { conda env list }
 #endregion
 
 #region Node.js
-Set-Alias -Name nr -Value npm -ArgumentList "run"
-Set-Alias -Name ns -Value npm -ArgumentList "start"
-Set-Alias -Name nb -Value npm -ArgumentList "run", "build"
-Set-Alias -Name nt -Value npm -ArgumentList "test"
-Set-Alias -Name ni -Value npm -ArgumentList "install"
-Set-Alias -Name nid -Value npm -ArgumentList "install", "--save-dev"
-Set-Alias -Name nig -Value npm -ArgumentList "install", "-g"
-Set-Alias -Name nu -Value npm -ArgumentList "uninstall"
-Set-Alias -Name nup -Value npm -ArgumentList "update"
-Set-Alias -Name nls -Value npm -ArgumentList "list", "--depth=0"
-Set-Alias -Name nout -Value npm -ArgumentList "outdated"
-Set-Alias -Name nci -Value npm -ArgumentList "ci"
+function nr { npm run @args }
+function ns { npm start @args }
+function nb { npm run build @args }
+function nt { npm test @args }
+function ni { npm install @args }
+function nid { npm install --save-dev @args }
+function nig { npm install -g @args }
+function nu { npm uninstall @args }
+function nup { npm update @args }
+function nls { npm list --depth=0 @args }
+function nout { npm outdated @args }
+function nci { npm ci @args }
 
 # Yarn
 function yr { yarn run $args }
@@ -76,16 +107,25 @@ function pnb { pnpm build $args }
 function pni { pnpm install $args }
 function pnid { pnpm install --save-dev $args }
 
-# NVM (Windows)
-function nvm { nvm-windows $args }
-function nvml { nvm list }
-function nvmi { nvm install $args }
-function nvmu { nvm use $args }
-
-# NVM (nvm-windows specific)
-function nvmuse { nvm use $args }
-function nvminstall { nvm install $args }
-function nvmcurrent { nvm current }
+# NVM (Cross-platform)
+if ($IsWindows) {
+    function nvm { nvm-windows $args }
+    function nvml { nvm list }
+    function nvmi { nvm install $args }
+    function nvmu { nvm use $args }
+    function nvmuse { nvm use $args }
+    function nvminstall { nvm install $args }
+    function nvmcurrent { nvm current }
+} else {
+    # NVM for Unix-like systems
+    function nvm { nvm $args }
+    function nvml { nvm list }
+    function nvmi { nvm install $args }
+    function nvmu { nvm use $args }
+    function nvmuse { nvm use $args }
+    function nvminstall { nvm install $args }
+    function nvmcurrent { nvm current }
+}
 #endregion
 
 #region Rust
@@ -161,7 +201,19 @@ function rbguninstall { gem uninstall $args }
 
 #region Docker
 Set-Alias -Name d -Value docker
-Set-Alias -Name dc -Value docker-compose
+
+# Check for docker-compose vs docker compose
+if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
+    Set-Alias -Name dc -Value docker-compose
+    $composeCmd = "docker-compose"
+} elseif (Get-Command docker -ErrorAction SilentlyContinue) {
+    # Use docker compose (newer syntax)
+    function dc { docker compose $args }
+    $composeCmd = "docker compose"
+} else {
+    Write-Warning "Docker not found"
+}
+
 Set-Alias -Name dps -Value Get-DockerContainers
 Set-Alias -Name dpa -Value Get-DockerAllContainers
 Set-Alias -Name di -Value Get-DockerImages
@@ -177,19 +229,19 @@ function dr { param([string]$Image) docker run -it --rm $Image }
 function dri { param([string]$Image) docker run -it $Image }
 function dprune { docker system prune -af }
 function dprunev { docker volume prune -f }
-function dstats { docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" }
+function dstats { docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" }
 
-# Docker Compose
-function dcu { docker-compose up $args }
-function dcud { docker-compose up -d $args }
-function dcd { docker-compose down $args }
-function dcdv { docker-compose down -v $args }
-function dcr { docker-compose restart $args }
-function dcb { docker-compose build $args }
-function dcl { docker-compose logs -f $args }
-function dce { docker-compose exec $args }
-function dcs { docker-compose stop $args }
-function dcstart { docker-compose start $args }
+# Docker Compose (cross-platform)
+function dcu { & $composeCmd up $args }
+function dcud { & $composeCmd up -d $args }
+function dcd { & $composeCmd down $args }
+function dcdv { & $composeCmd down -v $args }
+function dcr { & $composeCmd restart $args }
+function dcb { & $composeCmd build $args }
+function dcl { & $composeCmd logs -f $args }
+function dce { & $composeCmd exec $args }
+function dcs { & $composeCmd stop $args }
+function dcstart { & $composeCmd start $args }
 #endregion
 
 #region Kubernetes
@@ -313,10 +365,16 @@ function vresume { vagrant resume $args }
 function vprov { vagrant provision $args }
 #endregion
 
-#region VirtualBox
-function vbls { VBoxManage list vms }
-function vbrun { VBoxManage startvm $args }
-function vbstop { VBoxManage controlvm $args poweroff }
-function vbpause { VBoxManage controlvm $args pause }
-function vbresume { VBoxManage controlvm $args resume }
+#region VirtualBox (Cross-platform)
+if (Get-Command VBoxManage -ErrorAction SilentlyContinue) {
+    function vbls { VBoxManage list vms }
+    function vbrun { VBoxManage startvm $args }
+    function vbstop { VBoxManage controlvm $args poweroff }
+    function vbpause { VBoxManage controlvm $args pause }
+    function vbresume { VBoxManage controlvm $args resume }
+    
+    Write-Host "✓ VirtualBox utilities loaded" -ForegroundColor DarkGray
+} else {
+    Write-Warning "VirtualBox not found"
+}
 #endregion

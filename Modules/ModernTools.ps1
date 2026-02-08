@@ -196,19 +196,41 @@ if (Get-Command dog -ErrorAction SilentlyContinue) {
 if (Get-Command fzf -ErrorAction SilentlyContinue) {
     # Fuzzy cd
     function fcd {
-        $dir = fd --type d --hidden --follow --exclude .git | fzf --preview 'tree -C {} | head -20'
-        if ($dir) { Set-Location $dir }
+        if (Get-Command fd -ErrorAction SilentlyContinue) {
+            $dir = fd --type d --hidden --follow --exclude .git | fzf --preview 'tree -C {} | head -20'
+        } else {
+            $dir = Get-ChildItem -Recurse -Directory -Hidden | Where-Object { $_.FullName -notlike "*\.git*" } | 
+                    Select-Object FullName | fzf --preview 'tree -C {} | head -20'
+        }
+        if ($dir) { 
+            if ($dir -is [string]) {
+                Set-Location $dir
+            } else {
+                Set-Location $dir.FullName
+            }
+        }
     }
     
     # Fuzzy edit
     function fe {
-        $files = fd --type f --hidden --follow --exclude .git | fzf --multi --preview 'bat --style=numbers --color=always --line-range :500 {}'
-        if ($files) { & $env:EDITOR $files }
+        if (Get-Command fd -ErrorAction SilentlyContinue) {
+            $files = fd --type f --hidden --follow --exclude .git | fzf --multi --preview 'bat --style=numbers --color=always --line-range :500 {}'
+        } else {
+            $files = Get-ChildItem -Recurse -File -Hidden | Where-Object { $_.FullName -notlike "*\.git*" } | 
+                    Select-Object FullName | fzf --multi
+        }
+        if ($files) { 
+            if ($files -is [string]) {
+                & $env:EDITOR $files
+            } else {
+                & $env:EDITOR $files.FullName
+            }
+        }
     }
     
     # Fuzzy git checkout
     function fbr {
-        $branch = git branch -vv | fzf --height=20 --reverse +m
+        $branch = git branch -vv 2>$null | fzf --height=20 --reverse +m
         if ($branch) {
             $branchName = ($branch -split "\s+")[0] -replace "^\*?\s*", ""
             git checkout $branchName
@@ -217,7 +239,7 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
     
     # Fuzzy git log
     function fshow {
-        git log --graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" |
+        git log --graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" 2>$null |
         fzf --ansi --no-sort --reverse --tiebreak=index |
         ForEach-Object { ($_ -split "\s+")[0] } |
         ForEach-Object { git show --color=always $_ | less -R }
@@ -225,10 +247,17 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
     
     # Fuzzy kill
     function fkill {
-        $process = Get-Process | Select-Object Id, ProcessName, CPU | fzf --multi --header="[kill process]"
-        if ($process) {
-            $ids = $process | ForEach-Object { $_.Id }
-            Stop-Process -Id $ids -Force
+        if ($IsWindows) {
+            $process = Get-Process | Select-Object Id, ProcessName, CPU | fzf --multi --header="[kill process]"
+            if ($process) {
+                $ids = $process | ForEach-Object { $_.Id }
+                Stop-Process -Id $ids -Force
+            }
+        } else {
+            $process = ps aux | fzf --multi --header="[kill process]" | ForEach-Object { ($_ -split '\s+')[1] }
+            if ($process) {
+                kill -9 $process
+            }
         }
     }
     
@@ -298,10 +327,32 @@ if (Get-Command tldr -ErrorAction SilentlyContinue) {
 }
 #endregion
 
-#region Cliclick (Mac) / Nircmd (Windows) / XDoTool (Linux)
-if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+#region Platform Detection
+$IsWindows = $false
+$IsMacOS = $false
+$IsLinux = $false
+
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $IsWindows = $true
+} else {
+    $IsWindows = $IsWindows
+    $IsMacOS = $IsMacOS
+    $IsLinux = $IsLinux
+}
+#endregion
+
+#region Cross-Platform Automation Tools
+if ($IsWindows) {
     if (Get-Command nircmd -ErrorAction SilentlyContinue) {
         Write-Host "✓ Nircmd available for Windows automation" -ForegroundColor DarkGray
+    }
+} elseif ($IsMacOS) {
+    if (Get-Command cliclick -ErrorAction SilentlyContinue) {
+        Write-Host "✓ Cliclick available for macOS automation" -ForegroundColor DarkGray
+    }
+} elseif ($IsLinux) {
+    if (Get-Command xdotool -ErrorAction SilentlyContinue) {
+        Write-Host "✓ XDoTool available for Linux automation" -ForegroundColor DarkGray
     }
 }
 #endregion

@@ -17,27 +17,27 @@ $White = "`e[1;37m"
 $Reset = "`e[0m"
 
 # Platform Detection
-$IsWindows = $false
-$IsMacOS = $false
-$IsLinux = $false
+$powerconfig_IsWindows = $false
+$powerconfig_IsMacOS = $false
+$powerconfig_IsLinux = $false
 
 if ($PSVersionTable.PSVersion.Major -lt 6) {
-    $IsWindows = $true
+    $powerconfig_IsWindows = $true
 } else {
-    $IsWindows = $IsWindows
-    $IsMacOS = $IsMacOS
-    $IsLinux = $IsLinux
+    $powerconfig_IsWindows = $PSVersionTable.Platform -eq "Win32NT"
+    $powerconfig_IsMacOS = $PSVersionTable.Platform -eq "Unix" -and (Get-Command uname -ErrorAction SilentlyContinue) -and (uname) -match "Darwin"
+    $powerconfig_IsLinux = $PSVersionTable.Platform -eq "Unix" -and (Get-Command uname -ErrorAction SilentlyContinue) -and (uname) -match "Linux"
 }
 
 # Cross-platform Configuration
 $RepoUrl = "https://github.com/thepinak503/powerconfig"
 
-if ($IsWindows) {
+if ($powerconfig_IsWindows) {
     $InstallDir = "$env:USERPROFILE\.powerconfig"
     $BackupDir = "$env:USERPROFILE\.powerconfig-backup-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
     $ProfilePath = $PROFILE
 } else {
-    $InstallDir = "$env:HOME\.powerconfig"
+    $InstallDir = "$env:HOME/.powerconfig"
     $BackupDir = "$env:HOME/.powerconfig-backup-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
     $ProfilePath = "$env:HOME/.config/powershell/Microsoft.PowerShell_profile.ps1"
 }
@@ -91,7 +91,7 @@ function Detect-PackageManagers {
     
     $managers = @()
     
-    if ($IsWindows) {
+    if ($powerconfig_IsWindows) {
         if (Get-Command scoop -ErrorAction SilentlyContinue) {
             $managers += "Scoop"
             Print-Info "✓ Scoop detected"
@@ -112,7 +112,7 @@ function Detect-PackageManagers {
             Print-Info "Install Scoop: iwr -useb get.scoop.sh | iex"
             Print-Info "Or Chocolatey: https://chocolatey.org/install"
         }
-    } elseif ($IsMacOS) {
+    } elseif ($powerconfig_IsMacOS) {
         if (Get-Command brew -ErrorAction SilentlyContinue) {
             $managers += "Homebrew"
             Print-Info "✓ Homebrew detected"

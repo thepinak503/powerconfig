@@ -90,16 +90,12 @@ function env { Get-ChildItem Env: }
 
 #region Cross-Platform Utilities
 # Platform detection
-$IsWindows = $false
-$IsMacOS = $false
-$IsLinux = $false
-
 if ($PSVersionTable.PSVersion.Major -lt 6) {
-    $IsWindows = $true
+    $script:IsWindows = $true
 } else {
-    $IsWindows = $IsWindows
-    $IsMacOS = $IsMacOS
-    $IsLinux = $IsLinux
+    $script:IsWindows = $IsWindows
+    $script:IsMacOS = $IsMacOS
+    $script:IsLinux = $IsLinux
 }
 
 # Cross-platform editor aliases
@@ -151,7 +147,7 @@ function hosts {
     } elseif ($IsMacOS) {
         & $env:EDITOR "/etc/hosts"
     } else {
-        sudo & $env:EDITOR "/etc/hosts"
+        sudo $env:EDITOR "/etc/hosts"
     }
 }
 

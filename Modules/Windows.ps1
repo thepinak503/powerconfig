@@ -2,16 +2,12 @@
 # Universal utilities for Windows, macOS, and Linux
 
 #region Platform Detection
-$IsWindows = $false
-$IsMacOS = $false
-$IsLinux = $false
-
 if ($PSVersionTable.PSVersion.Major -lt 6) {
-    $IsWindows = $true
+    $script:IsWindows = $true
 } else {
-    $IsWindows = $IsWindows
-    $IsMacOS = $IsMacOS
-    $IsLinux = $IsLinux
+    $script:IsWindows = $IsWindows
+    $script:IsMacOS = $IsMacOS
+    $script:IsLinux = $IsLinux
 }
 #endregion
 
@@ -133,7 +129,7 @@ function hosts {
     } elseif ($IsMacOS) {
         & $env:EDITOR "/etc/hosts"
     } else {
-        sudo & $env:EDITOR "/etc/hosts"
+        sudo $env:EDITOR "/etc/hosts"
     }
 }
 #endregion

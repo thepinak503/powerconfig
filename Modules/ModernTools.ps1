@@ -328,16 +328,12 @@ if (Get-Command tldr -ErrorAction SilentlyContinue) {
 #endregion
 
 #region Platform Detection
-$IsWindows = $false
-$IsMacOS = $false
-$IsLinux = $false
-
 if ($PSVersionTable.PSVersion.Major -lt 6) {
-    $IsWindows = $true
+    $script:IsWindows = $true
 } else {
-    $IsWindows = $IsWindows
-    $IsMacOS = $IsMacOS
-    $IsLinux = $IsLinux
+    $script:IsWindows = $IsWindows
+    $script:IsMacOS = $IsMacOS
+    $script:IsLinux = $IsLinux
 }
 #endregion
 

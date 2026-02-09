@@ -1,27 +1,10 @@
 # PowerConfig Development Tools
 # Python, Node.js, Rust, Go, Docker, Kubernetes, Terraform
 
-#region Platform Detection
-if ($PSVersionTable.PSVersion.Major -lt 6) {
-    $script:IsWindows = $true
-} else {
-    $script:IsWindows = $IsWindows
-    $script:IsMacOS = $IsMacOS
-    $script:IsLinux = $IsLinux
-}
-#endregion
-
 #region Python
-# Cross-platform Python aliases
-if (Get-Command python3 -ErrorAction SilentlyContinue) {
-    Set-Alias -Name py -Value python3
-    Set-Alias -Name py3 -Value python3
-    Set-Alias -Name pip -Value pip3
-} elseif (Get-Command python -ErrorAction SilentlyContinue) {
-    Set-Alias -Name py -Value python
-    Set-Alias -Name py3 -Value python
-    Set-Alias -Name pip -Value pip
-}
+Set-Alias -Name py -Value python
+Set-Alias -Name py3 -Value python3
+Set-Alias -Name pip -Value pip3
 
 function pipi { pip install $args }
 function pipu { pip install --upgrade $args }
@@ -35,17 +18,7 @@ function venv {
     param([string]$Name = "venv")
     python -m venv $Name 
 }
-
-function venva { 
-    param([string]$Name = "venv")
-    
-    if ($IsWindows) {
-        & ".\$Name\Scripts\Activate.ps1"
-    } else {
-        & ".\$Name/bin/activate"
-    }
-}
-
+function venva { .\venv\Scripts\Activate.ps1 }
 function venvd { deactivate }
 
 # Poetry
@@ -72,18 +45,18 @@ function cel { conda env list }
 #endregion
 
 #region Node.js
-function nr { npm run @args }
-function ns { npm start @args }
-function nb { npm run build @args }
-function nt { npm test @args }
-function ni { npm install @args }
-function nid { npm install --save-dev @args }
-function nig { npm install -g @args }
-function nu { npm uninstall @args }
-function nup { npm update @args }
-function nls { npm list --depth=0 @args }
-function nout { npm outdated @args }
-function nci { npm ci @args }
+function nr { npm run $args }
+function ns { npm start $args }
+function nb { npm run build $args }
+function nt { npm test $args }
+function ni { npm install $args }
+function nid { npm install --save-dev $args }
+function nig { npm install -g $args }
+function nu { npm uninstall $args }
+function nup { npm update $args }
+function nls { npm list --depth=0 $args }
+function nout { npm outdated $args }
+function nci { npm ci $args }
 
 # Yarn
 function yr { yarn run $args }
@@ -103,48 +76,51 @@ function pnb { pnpm build $args }
 function pni { pnpm install $args }
 function pnid { pnpm install --save-dev $args }
 
-# NVM (Cross-platform)
-if ($IsWindows) {
-    function nvm { nvm-windows $args }
-    function nvml { nvm list }
-    function nvmi { nvm install $args }
-    function nvmu { nvm use $args }
-    function nvmuse { nvm use $args }
-    function nvminstall { nvm install $args }
-    function nvmcurrent { nvm current }
-} else {
-    # NVM for Unix-like systems
-    function nvm { nvm $args }
-    function nvml { nvm list }
-    function nvmi { nvm install $args }
-    function nvmu { nvm use $args }
-    function nvmuse { nvm use $args }
-    function nvminstall { nvm install $args }
-    function nvmcurrent { nvm current }
-}
+# NVM (Windows)
+function nvm { nvm-windows $args }
+function nvml { nvm list }
+function nvmi { nvm install $args }
+function nvmu { nvm use $args }
+
+# NVM (nvm-windows specific)
+function nvmuse { nvm use $args }
+function nvminstall { nvm install $args }
+function nvmcurrent { nvm current }
 #endregion
 
 #region Rust
-function c { cargo $args }
-function cb { cargo build $args }
-function cbr { cargo build --release $args }
-function cr { cargo run $args }
-function ct { cargo test $args }
-function cc { cargo check $args }
-function cf { cargo fmt $args }
-function cl { cargo clippy $args }
-function cdoc { cargo doc --open $args }
-function cnew { cargo new $args }
-function cinit { cargo init $args }
-function cpub { cargo publish $args }
-function csearch { cargo search $args }
-function ctree { cargo tree $args }
-function cinstall { cargo install $args }
-function cuninstall { cargo uninstall $args }
-function cwatch { cargo watch -x run $args }
-function cbench { cargo bench $args }
-function cfix { cargo fix $args }
-function cupdate { cargo update $args }
+function cargo-build { cargo build $args }
+function cargo-build-release { cargo build --release $args }
+function cargo-run { cargo run $args }
+function cargo-test { cargo test $args }
+function cargo-check { cargo check $args }
+function cargo-fmt { cargo fmt $args }
+function cargo-clippy { cargo clippy $args }
+function cargo-doc { cargo doc --open $args }
+function cargo-new { cargo new $args }
+function cargo-init { cargo init $args }
+function cargo-publish { cargo publish $args }
+function cargo-search { cargo search $args }
+function cargo-tree { cargo tree $args }
+function cargo-install { cargo install $args }
+function cargo-uninstall { cargo uninstall $args }
+function cargo-watch { cargo watch -x run $args }
+function cargo-bench { cargo bench $args }
+function cargo-fix { cargo fix $args }
+function cargo-update { cargo update $args }
+
+# Rust shortcuts (using 'cg' prefix to avoid conflicts)
+function cg { cargo $args }
+function cgb { cargo build $args }
+function cgbr { cargo build --release $args }
+function cgr { cargo run $args }
+function cgt { cargo test $args }
+function cgc { cargo check $args }
+function cgf { cargo fmt $args }
+function cgdoc { cargo doc --open $args }
+function cgnew { cargo new $args }
+function cginit { cargo init $args }
+function cgpublish { cargo publish $args }
 
 # Rustup
 function rup { rustup update $args }
@@ -196,55 +172,43 @@ function rbguninstall { gem uninstall $args }
 #endregion
 
 #region Docker
-Set-Alias -Name d -Value docker
-
-# Check for docker-compose vs docker compose
-if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
-    Set-Alias -Name dc -Value docker-compose
-    $composeCmd = "docker-compose"
-} elseif (Get-Command docker -ErrorAction SilentlyContinue) {
-    # Use docker compose (newer syntax)
-    function dc { docker compose $args }
-    $composeCmd = "docker compose"
-} else {
-    Write-Warning "Docker not found"
-}
-
-Set-Alias -Name dps -Value Get-DockerContainers
-Set-Alias -Name dpa -Value Get-DockerAllContainers
-Set-Alias -Name di -Value Get-DockerImages
-Set-Alias -Name dl -Value Get-DockerLogs
+function d { docker $args }
+function dc { docker-compose $args }
+function dps { Get-DockerContainers }
+function dpa { Get-DockerAllContainers }
+function di { Get-DockerImages }
+function dl { Get-DockerLogs }
 
 function Get-DockerContainers { docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" }
 function Get-DockerAllContainers { docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" }
 function Get-DockerImages { docker images }
-function Get-DockerLogs { param([string]$Container) docker logs -f $Container }
+function Get-DockerLogs { param([string]$Container = "") docker logs -f $Container }
 
 function dex { param([string]$Container) docker exec -it $Container sh }
 function dr { param([string]$Image) docker run -it --rm $Image }
 function dri { param([string]$Image) docker run -it $Image }
 function dprune { docker system prune -af }
 function dprunev { docker volume prune -f }
-function dstats { docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" }
+function dstats { docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" }
 
-# Docker Compose (cross-platform)
-function dcu { & $composeCmd up $args }
-function dcud { & $composeCmd up -d $args }
-function dcd { & $composeCmd down $args }
-function dcdv { & $composeCmd down -v $args }
-function dcr { & $composeCmd restart $args }
-function dcb { & $composeCmd build $args }
-function dcl { & $composeCmd logs -f $args }
-function dce { & $composeCmd exec $args }
-function dcs { & $composeCmd stop $args }
-function dcstart { & $composeCmd start $args }
+# Docker Compose
+function dcu { docker-compose up $args }
+function dcud { docker-compose up -d $args }
+function dcd { docker-compose down $args }
+function dcdv { docker-compose down -v $args }
+function dcr { docker-compose restart $args }
+function dcb { docker-compose build $args }
+function dcl { docker-compose logs -f $args }
+function dce { docker-compose exec $args }
+function dcs { docker-compose stop $args }
+function dcstart { docker-compose start $args }
 #endregion
 
 #region Kubernetes
-Set-Alias -Name k -Value kubectl
-Set-Alias -Name kg -Value Get-Kubectl
-Set-Alias -Name kd -Value Describe-Kubectl
-Set-Alias -Name kl -Value Logs-Kubectl
+function k { kubectl $args }
+function kg { Get-Kubectl }
+function kd { Describe-Kubectl }
+function kl { Logs-Kubectl }
 
 function Get-Kubectl { kubectl get $args }
 function Describe-Kubectl { kubectl describe $args }
@@ -361,16 +325,10 @@ function vresume { vagrant resume $args }
 function vprov { vagrant provision $args }
 #endregion
 
-#region VirtualBox (Cross-platform)
-if (Get-Command VBoxManage -ErrorAction SilentlyContinue) {
-    function vbls { VBoxManage list vms }
-    function vbrun { VBoxManage startvm $args }
-    function vbstop { VBoxManage controlvm $args poweroff }
-    function vbpause { VBoxManage controlvm $args pause }
-    function vbresume { VBoxManage controlvm $args resume }
-    
-    Write-Host "✓ VirtualBox utilities loaded" -ForegroundColor DarkGray
-} else {
-    Write-Warning "VirtualBox not found"
-}
+#region VirtualBox
+function vbls { VBoxManage list vms }
+function vbrun { VBoxManage startvm $args }
+function vbstop { VBoxManage controlvm $args poweroff }
+function vbpause { VBoxManage controlvm $args pause }
+function vbresume { VBoxManage controlvm $args resume }
 #endregion

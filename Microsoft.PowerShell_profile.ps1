@@ -32,6 +32,13 @@ if (Get-Command code -ErrorAction SilentlyContinue) {
 # Locale
 $env:LANG = "en_US.UTF-8"
 
+# Starship Config Path
+if ($IsWindows) {
+    $env:STARSHIP_CONFIG = "$env:USERPROFILE\.powerconfig\starship.toml"
+} else {
+    $env:STARSHIP_CONFIG = "$env:HOME/.powerconfig/starship.toml"
+}
+
 # Disable annoying prompts
 $env:VIRTUAL_ENV_DISABLE_PROMPT = "1"
 $env:PYTHONDONTWRITEBYTECODE = "1"

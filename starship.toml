@@ -1,533 +1,974 @@
-# Starship - Comprehensive PowerShell Prompt Configuration
-# Compatible with: Python, Node.js, Go, Rust, Docker, Git, AWS, Azure, Kubernetes, and more
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  STARSHIP - ULTRA NERDY CONFIGURATION v2.1 (FIXED)                       ║
+# ║  "Because your terminal should look like a spaceship cockpit"            ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
 
-# General Settings
-add_newline = false
-command_timeout = 1000
-scan_timeout = 50
+# ============================================================================
+# GENERAL SETTINGS
+# ============================================================================
+add_newline = true
+command_timeout = 2000
+scan_timeout = 100
 
-# Format the entire prompt
+# ============================================================================
+# PROMPT FORMAT - Multi-line Ultra Nerdy Layout
+# ============================================================================
 format = """
-[](bright-black)$username[](bright-black)$directory$git_branch$git_status[](bright-black)$fill[](bright-black)$time[](bright-black)
-$python$nodejs$go$rust$docker$package$cmd_duration$status
-$character"""
+[╭─](bold bright-black)\
+$os\
+$shell\
+$username\
+[@](bold bright-black)\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$directory\
+$vcsh\
+$fossil_branch\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$pijul_channel\
+$docker_context\
+$container\
+$package\
+$c\
+$cmake\
+$cobol\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$fennel\
+$golang\
+$guix_shell\
+$haskell\
+$haxe\
+$helm\
+$java\
+$julia\
+$kotlin\
+$gradle\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$opa\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$quarto\
+$raku\
+$rlang\
+$red\
+$ruby\
+$rust\
+$scala\
+$solidity\
+$swift\
+$terraform\
+$typst\
+$vlang\
+$vagrant\
+$zig\
+$buf\
+$nix_shell\
+$conda\
+$meson\
+$spack\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$direnv\
+$env_var\
+$crystal\
+$sudo\
+$fill\
+$jobs\
+$battery\
+$time\
+$cmd_duration\
+$status
+[╰─](bold bright-black)$character"""
+
+continuation_prompt = '[▸▸](bright-black) '
 
 # ============================================================================
-# LEFT SIDE - Context & Location
+# SYSTEM INFORMATION
 # ============================================================================
+
+[os]
+disabled = false
+format = "[$symbol]($style) "
+style = "bold bright-white"
+
+[os.symbols]
+AIX = "➈ "
+Alpaquita = "🔔 "
+AlmaLinux = " "
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+CentOS = " "
+Debian = " "
+DragonFly = "🐉 "
+Emscripten = "🔗 "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "󰛓 "
+Gentoo = " "
+HardenedBSD = "🛡️ "
+Illumos = "🐦 "
+Kali = " "
+Linux = " "
+Mabox = "📦 "
+Macos = " "
+Manjaro = " "
+Mariner = "🌊 "
+MidnightBSD = "🌘 "
+Mint = "󰣭 "
+NetBSD = "🚩 "
+NixOS = " "
+OpenBSD = "🐡 "
+OpenCloudOS = "☁️ "
+openEuler = "🦉 "
+openSUSE = " "
+OracleLinux = "🔮 "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+RockyLinux = "🪨 "
+Redox = "🧪 "
+Solus = " "
+SUSE = " "
+Ubuntu = " "
+Ultramarine = "🔵 "
+Unknown = "❓ "
+Void = " "
+Windows = " "
+
+[shell]
+disabled = false
+format = '[$indicator]($style) '
+style = "bold bright-cyan"
+fish_indicator = "󰈺 fish"
+zsh_indicator = " zsh"
+bash_indicator = " bash"
+powershell_indicator = "󰨊 pwsh"
+cmd_indicator = " cmd"
+nu_indicator = "󰟆 nu"
+ion_indicator = "⚛ ion"
+elvish_indicator = "∿ elvish"
+tcsh_indicator = " tcsh"
+xonsh_indicator = "🐚 xonsh"
+unknown_indicator = "❓ shell"
 
 [username]
-format = "[$user]($style)"
-style_root = "bright-red bold"
-style_user = "bright-cyan bold"
+format = "[󰀄 $user]($style)"
+style_root = "bold bright-red"
+style_user = "bold bright-green"
 show_always = true
 
+[hostname]
+format = "[$hostname$ssh_symbol]($style) "
+style = "bold bright-yellow"
+ssh_only = false
+ssh_symbol = " 󰣀"
+trim_at = "."
+disabled = false
+
+[localip]
+format = '[\[$localipv4\]]($style) '
+style = "bold bright-black"
+ssh_only = true
+disabled = false
+
+[shlvl]
+disabled = false
+format = "[$symbol$shlvl]($style) "
+symbol = "󰜮 "
+style = "bold bright-yellow"
+threshold = 2
+repeat = false
+
+[singularity]
+format = '[$symbol\[$env\]]($style) '
+symbol = "📦 "
+style = "bold bright-blue"
+
 [directory]
-format = "[$path]($style)"
-truncation_length = 3
+format = "[󰉋 $path]($style)[$read_only]($read_only_style) "
+truncation_length = 4
 truncation_symbol = "…/"
-home_symbol = "~"
-style = "bright-yellow bold"
+home_symbol = " ~"
+style = "bold bright-cyan"
+read_only = " 󰌾"
+read_only_style = "bold bright-red"
 truncate_to_repo = true
-read_only = " "
-read_only_style = "bright-red"
+repo_root_format = "[󰊢 $before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) "
+repo_root_style = "bold bright-magenta"
+before_repo_root_style = "bold bright-black"
+use_os_path_sep = true
+use_logical_path = true
+
+[directory.substitutions]
+"Documents" = "󰈙 Docs"
+"Downloads" = " DL"
+"Music" = " Music"
+"Pictures" = " Pics"
+"Videos" = " Vids"
+"Projects" = " Proj"
+"Development" = "󰲋 Dev"
+"GitHub" = " GH"
+"GitLab" = " GL"
+".config" = " cfg"
 
 # ============================================================================
-# GIT MODULES
+# GIT - Comprehensive Version Control
 # ============================================================================
 
 [git_branch]
-symbol = ""
-format = "[$symbol$branch]($style)"
-truncation_length = 25
+format = "[󰊢 $symbol$branch(:$remote_branch)]($style) "
+symbol = " "
+style = "bold bright-magenta"
+truncation_length = 30
 truncation_symbol = "…"
-style = "bright-magenta"
+only_attached = false
+always_show_remote = true
 
-[git_status]
-format = '([$all_status$ahead_behind]($style))'
-style = "bright-red"
-conflicted = ""
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕"
-untracked = "?${count}"
-stashed = ""
-modified = "!${count}"
-staged = "+${count}"
-renamed = "»${count}"
-deleted = "✘${count}"
+[git_commit]
+format = '[󰜘 \($hash$tag\)]($style) '
+commit_hash_length = 7
+style = "bold bright-green"
+only_detached = false
+tag_disabled = false
+tag_symbol = " 󰓹 "
+
+[git_state]
+format = '\[[$state( $progress_current/$progress_total)]($style)\] '
+style = "bold bright-yellow"
+rebase = "REBASING"
+merge = "MERGING"
+revert = "REVERTING"
+cherry_pick = "🍒 PICKING"
+bisect = "BISECTING"
+am = "AM"
+am_or_rebase = "AM/REBASE"
 
 [git_metrics]
 disabled = false
-added_style = "bright-green"
-deleted_style = "bright-red"
-format = '[+$added]($added_style)/[-$deleted]($deleted_style) '
+format = '([󰐖 $added]($added_style))([󰍴 $deleted]($deleted_style)) '
+added_style = "bold bright-green"
+deleted_style = "bold bright-red"
+only_nonzero_diffs = true
 
-[git_commit]
-commit_hash_length = 7
-format = '[($hash$tag)]($style) '
-style = "bright-green"
-
-# ============================================================================
-# SPACER & TIME
-# ============================================================================
-
-[fill]
-symbol = ""
-style = "bright-black"
-
-[time]
-disabled = false
-format = "[$time]($style)"
-style = "bright-white bold"
-time_format = "%H:%M"
-use_12hr = false
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold bright-red"
+conflicted = "󰞇 ${count}"
+ahead = "󰜷 ${count}"
+behind = "󰜮 ${count}"
+diverged = "󰃻 󰜷${ahead_count}󰜮${behind_count}"
+up_to_date = "󰄬 "
+untracked = "󰋗 ${count}"
+stashed = "󰏗 ${count}"
+modified = "󰝶 ${count}"
+staged = "󰐖 ${count}"
+renamed = "󰑕 ${count}"
+deleted = "󰍴 ${count}"
 
 # ============================================================================
-# LANGUAGE VERSIONS - Right Side Line
-# ============================================================================
-
-[python]
-symbol = ""
-format = '[${symbol}${pyenv_prefix}${version}( \($virtualenv\))]($style) '
-style = "bright-green bold"
-pyenv_version_name = true
-pyenv_prefix = "py "
-python_binary = ["python", "python3", "python2"]
-detect_extensions = ["py"]
-detect_files = [".python-version", "Pipfile", "__init__.py", "pyproject.toml", "requirements.txt", "setup.py", "setup.cfg", "tox.ini", "poetry.lock"]
-detect_folders = [".venv", "venv", "env"]
-
-[nodejs]
-symbol = ""
-format = '[$symbol($version )]($style)'
-style = "bright-green bold"
-detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts"]
-detect_files = ["package.json", ".node-version", ".nvmrc", "yarn.lock", "pnpm-lock.yaml", "bun.lockb"]
-detect_folders = ["node_modules"]
-
-[go]
-symbol = "go "
-format = '[$symbol($version )]($style)'
-style = "bright-cyan bold"
-detect_extensions = ["go"]
-detect_files = ["go.mod", "go.sum", "glide.yaml", "Gopkg.yml", "Gopkg.lock", ".go-version"]
-detect_folders = ["Godeps", "vendor"]
-
-[rust]
-symbol = "rs "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_extensions = ["rs"]
-detect_files = ["Cargo.toml", "Cargo.lock", "rust-toolchain", "rustfmt.toml", ".rustfmt.toml"]
-detect_folders = ["target"]
-
-[package]
-symbol = ""
-format = '[$symbol$version]($style) '
-style = "bright-yellow bold"
-disabled = false
-
-# ============================================================================
-# CONTAINER & ORCHESTRATION
-# ============================================================================
-
-[docker_context]
-symbol = "docker "
-format = '[$symbol$context]($style) '
-style = "bright-blue bold"
-detect_files = ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"]
-detect_folders = [".docker"]
-
-[kubernetes]
-symbol = "k8s "
-format = '[$symbol$context( \($namespace\))]($style) '
-style = "bright-cyan bold"
-detect_files = ["*.yaml", "*.yml", "kustomization.yaml", "Chart.yaml", "skaffold.yaml"]
-detect_folders = ["k8s", "kubernetes", "manifests", "charts"]
-
-[helm]
-format = 'via [$symbol($version )]($style)'
-symbol = ""
-style = "bright-white bold"
-detect_files = ["helmfile.yaml", "Chart.yaml"]
-detect_folders = ["charts"]
-
-# ============================================================================
-# CLOUD PLATFORMS
-# ============================================================================
-
-[aws]
-symbol = "aws "
-format = '[$symbol($profile )(\($region\) )(\[$duration\])]($style)'
-style = "bright-yellow bold"
-force_display = false
-
-[azure]
-symbol = "azure "
-format = '[$symbol($subscription)(\($region\))]($style) '
-style = "bright-blue bold"
-
-[gcloud]
-symbol = "gcp "
-format = '[$symbol$account(@$domain)(\($region\))]($style) '
-style = "bright-blue bold"
-
-# ============================================================================
-# INFRASTRUCTURE & TOOLS
-# ============================================================================
-
-[terraform]
-symbol = "tf "
-format = '[$symbol($version )]($style)'
-style = "bright-purple bold"
-detect_files = ["*.tf", "*.tfvars", ".terraform-version"]
-detect_folders = [".terraform"]
-
-[ansible]
-symbol = "ansible "
-format = '[$symbol($version )]($style)'
-style = "bright-white bold"
-detect_files = ["ansible.cfg", "ansible.yml", "site.yml", "hosts"]
-detect_extensions = ["yml", "yaml"]
-
-[vagrant]
-symbol = "vagrant "
-format = '[$symbol($version )]($style)'
-style = "bright-cyan bold"
-detect_files = ["Vagrantfile"]
-detect_folders = [".vagrant"]
-
-[docker_compose]
-symbol = "compose "
-format = '[$symbol$version]($style)'
-style = "bright-blue"
-detect_files = ["docker-compose.yml", "docker-compose.yaml", "compose.yaml"]
-
-# ============================================================================
-# DATABASES
-# ============================================================================
-
-[dotnet]
-symbol = ".NET "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-heuristic = true
-
-# ============================================================================
-# SHELLS & TERMINALS
-# ============================================================================
-
-[pwsh]
-symbol = "pwsh "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-
-[cmd_duration]
-min_time = 500
-format = "[$duration]($style) "
-style = "bright-yellow"
-show_milliseconds = false
-show_notifications = false
-
-[status]
-disabled = false
-format = "[$symbol$status]($style) "
-symbol = "✖ "
-success_symbol = ""
-signal_symbol = ""
-style = "bright-red bold"
-recognize_signal_code = true
-map_symbol = true
-pipestatus = true
-pipestatus_format = '[$pipestatus] => [$symbol$common_meaning]($style)'
-pipestatus_separator = '|'
-pipestatus_separator_format = '[$symbol]($style)'
-
-[character]
-format = "$symbol "
-success_symbol = "[❯](bright-green bold)"
-error_symbol = "[❯](bright-red bold)"
-
-# ============================================================================
-# VERSION CONTROL
+# OTHER VCS
 # ============================================================================
 
 [hg_branch]
-symbol = "hg "
-format = '[$symbol$branch]($style) '
-truncation_length = 25
+format = "[󰜛 $symbol$branch(:$topic)]($style) "
+symbol = " "
+style = "bold bright-purple"
+truncation_length = 30
 truncation_symbol = "…"
-style = "bright-purple bold"
 
-[svn]
-symbol = "svn "
-format = '[$symbol$branch]($style) '
-style = "bright-yellow bold"
+[pijul_channel]
+format = "[󰜛 $symbol$channel]($style) "
+symbol = " "
+style = "bold bright-yellow"
+truncation_length = 30
+truncation_symbol = "…"
+
+[fossil_branch]
+format = "[󰜛 $symbol$branch]($style) "
+symbol = " "
+style = "bold bright-cyan"
+truncation_length = 30
+truncation_symbol = "…"
 
 # ============================================================================
 # PROGRAMMING LANGUAGES
 # ============================================================================
 
-[php]
-symbol = "php "
-format = '[$symbol($version )]($style)'
-style = "bright-purple bold"
-detect_extensions = ["php"]
-detect_files = ["composer.json", ".php-version", "phpunit.xml", "pint.json"]
-detect_folders = ["vendor"]
+[python]
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+symbol = " "
+style = "bold bright-yellow"
+pyenv_version_name = true
+pyenv_prefix = "py:"
+python_binary = ["python3", "python", "python2"]
+detect_extensions = ["py", "pyw", "pyi"]
+detect_files = [
+    ".python-version",
+    "Pipfile",
+    "__init__.py",
+    "pyproject.toml",
+    "requirements.txt",
+    "setup.py",
+    "setup.cfg",
+    "tox.ini",
+    "poetry.lock",
+    "pyrightconfig.json",
+    "pdm.lock"
+]
+detect_folders = [".venv", "venv", "env", ".env", "__pycache__"]
+version_format = "v${raw}"
 
-[ruby]
-symbol = "ruby "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_extensions = ["rb"]
-detect_files = ["Gemfile", ".ruby-version", "Rakefile", "Gemfile.lock", "*.gemspec"]
-detect_folders = ["vendor", ".bundle"]
+[nodejs]
+format = '[${symbol}(${version} )]($style)'
+symbol = "󰎙 "
+style = "bold bright-green"
+detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts", "tsx", "jsx"]
+detect_files = [
+    "package.json",
+    ".node-version",
+    ".nvmrc",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "bun.lockb",
+    ".npmrc"
+]
+detect_folders = ["node_modules"]
+version_format = "v${raw}"
+
+[golang]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-cyan"
+detect_extensions = ["go"]
+detect_files = ["go.mod", "go.sum", "go.work", "glide.yaml", "Gopkg.yml", "Gopkg.lock", ".go-version"]
+detect_folders = ["Godeps"]
+version_format = "v${raw}"
+
+[rust]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
+detect_extensions = ["rs"]
+detect_files = ["Cargo.toml", "Cargo.lock", "rust-toolchain", "rust-toolchain.toml"]
+detect_folders = []
+version_format = "v${raw}"
 
 [java]
-symbol = "java "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_extensions = ["java", "class", "jar"]
-detect_files = ["pom.xml", "build.gradle", "build.gradle.kts", ".java-version"]
-detect_folders = ["target", "build", ".gradle"]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
+detect_extensions = ["java", "class", "jar", "gradle", "clj", "cljc"]
+detect_files = [
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "build.sbt",
+    ".java-version",
+    "deps.edn",
+    "project.clj",
+    ".sdkmanrc"
+]
+detect_folders = []
+version_format = "v${raw}"
 
 [kotlin]
-symbol = "kt "
-format = '[$symbol($version )]($style)'
-style = "bright-magenta bold"
+format = '[${symbol}(${version} )]($style)'
+symbol = "󱈙 "
+style = "bold bright-magenta"
 detect_extensions = ["kt", "kts"]
-detect_files = ["build.gradle.kts"]
+detect_files = []
+version_format = "v${raw}"
 
 [scala]
-symbol = "scala "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
 detect_extensions = ["scala", "sbt", "sc"]
-detect_files = ["build.sbt", ".scala-version"]
-detect_folders = ["target", ".sbt", "project"]
+detect_files = ["build.sbt", ".scalafix.conf", ".scalafmt.conf"]
+detect_folders = []
+version_format = "v${raw}"
 
-[elixir]
-symbol = "exs "
-format = '[$symbol($version )]($style)'
-style = "bright-purple bold"
-detect_extensions = ["ex", "exs"]
-detect_files = ["mix.exs"]
-detect_folders = ["_build", "deps"]
+[dotnet]
+format = '[${symbol}(${version} )(󰓾 $tfm )]($style)'
+symbol = "󰪮 "
+style = "bold bright-purple"
+detect_extensions = ["csproj", "fsproj", "xproj", "sln", "cs", "fs", "vb"]
+detect_files = ["global.json", "project.json", "Directory.Build.props"]
+detect_folders = []
+version_format = "v${raw}"
+heuristic = true
 
-[elm]
-symbol = "elm "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_extensions = ["elm"]
-detect_files = ["elm.json", "elm-package.json", ".elm-version"]
-detect_folders = ["elm-stuff"]
+[php]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-purple"
+detect_extensions = ["php"]
+detect_files = ["composer.json", ".php-version", "phpunit.xml"]
+detect_folders = []
+version_format = "v${raw}"
 
-[erlang]
-symbol = "erl "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_extensions = ["erl", "hrl"]
-detect_files = ["rebar.config", "erlang.mk"]
-detect_folders = ["_build", "deps"]
+[ruby]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
+detect_extensions = ["rb", "rake", "gemspec"]
+detect_files = ["Gemfile", ".ruby-version", "Rakefile", "Gemfile.lock"]
+detect_folders = []
+version_format = "v${raw}"
 
-# ============================================================================
-# FRAMEWORKS & BUILD TOOLS
-# ============================================================================
-
-[gradle]
-symbol = "gradle "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_files = ["build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"]
-detect_folders = ["gradle", ".gradle"]
-
-[maven]
-symbol = "maven "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_files = ["pom.xml"]
-detect_folders = ["target", ".mvn"]
-
-[julia]
-symbol = "jl "
-format = '[$symbol($version )]($style)'
-style = "bright-purple bold"
-detect_extensions = ["jl"]
-detect_files = ["Project.toml", "Manifest.toml", "JuliaProject.toml"]
-detect_folders = ["deps"]
-
-[lua]
-symbol = "lua "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_extensions = ["lua"]
-detect_files = [".lua-version"]
-detect_folders = ["lua_modules"]
-
-# ============================================================================
-# CONFIG & DATA FORMATS
-# ============================================================================
-
-[nim]
-symbol = "nim "
-format = '[$symbol($version )]($style)'
-style = "bright-yellow bold"
-detect_extensions = ["nim", "nims", "nimble"]
-detect_files = ["nim.cfg", "*.nimble"]
-
-[crystal]
-symbol = "crystal "
-format = '[$symbol($version )]($style)'
-style = "bright-black bold"
-detect_extensions = ["cr"]
-detect_files = ["shard.yml"]
-detect_folders = ["lib"]
-
-[dart]
-symbol = "dart "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_extensions = ["dart"]
-detect_files = ["pubspec.yaml", "pubspec.yml"]
-detect_folders = [".dart_tool", "build"]
-
-[flutter]
-symbol = "flutter "
-format = '[$symbol($version )]($style)'
-style = "bright-cyan bold"
-detect_files = ["pubspec.yaml"]
-detect_folders = [".dart_tool", "build", "ios", "android"]
-
-# ============================================================================
-# SYSTEM & UTILITIES
-# ============================================================================
-
-[perl]
-symbol = "perl "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_extensions = ["pl", "pm", "pod"]
-detect_files = ["cpanfile", "META.json", "META.yml", ".perl-version"]
-
-[raku]
-symbol = "raku "
-format = '[$symbol($version )]($style)'
-style = "bright-red bold"
-detect_extensions = ["raku", "rakumod", "rakutest", "p6", "pm6", "pod6"]
-
-[zig]
-symbol = "zig "
-format = '[$symbol($version )]($style)'
-style = "bright-yellow bold"
-detect_extensions = ["zig"]
-detect_files = ["build.zig"]
-detect_folders = ["zig-cache", "zig-out"]
-
-[deno]
-symbol = "deno "
-format = '[$symbol($version )]($style)'
-style = "bright-green bold"
-detect_extensions = ["ts", "js", "tsx", "jsx"]
-detect_files = ["deno.json", "deno.jsonc", "import_map.json", "deps.ts"]
-
-[bun]
-symbol = "bun "
-format = '[$symbol($version )]($style)'
-style = "bright-white bold"
-detect_extensions = ["js", "ts", "jsx", "tsx"]
-detect_files = ["bun.lockb", "bunfig.toml"]
-detect_folders = ["node_modules"]
-
-# ============================================================================
-# OTHER TOOLS
-# ============================================================================
+[swift]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
+detect_extensions = ["swift"]
+detect_files = ["Package.swift"]
+detect_folders = []
+version_format = "v${raw}"
 
 [c]
-symbol = "C "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
-detect_extensions = ["c", "h"]
-detect_files = ["CMakeLists.txt", "Makefile", "configure", "configure.ac", "configure.in"]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["c", "h", "cpp", "cxx", "cc", "hpp", "hxx"]
+detect_files = ["CMakeLists.txt", "Makefile", "configure"]
+version_format = "v${raw}"
 
 [cmake]
-symbol = "cmake "
-format = '[$symbol($version )]($style)'
-style = "bright-blue bold"
+format = '[${symbol}(${version} )]($style)'
+symbol = "△ "
+style = "bold bright-blue"
 detect_extensions = ["cmake"]
-detect_files = ["CMakeLists.txt"]
-detect_folders = ["cmake", "build", "out"]
+detect_files = ["CMakeLists.txt", "CMakePresets.json"]
+detect_folders = []
+version_format = "v${raw}"
 
-[conda]
-symbol = "conda "
-format = '[$symbol$environment]($style) '
-truncation_length = 1
-style = "bright-green bold"
-ignore_base = true
+[haskell]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-purple"
+detect_extensions = ["hs", "cabal"]
+detect_files = ["stack.yaml", "cabal.project"]
+detect_folders = []
+version_format = "v${raw}"
 
-detect_files = ["environment.yml", "environment.yaml", "conda-lock.yml"]
+[elixir]
+format = '[${symbol}(${version} \(OTP ${otp_version}\) )]($style)'
+symbol = " "
+style = "bold bright-purple"
+detect_extensions = ["ex", "exs"]
+detect_files = ["mix.exs"]
+detect_folders = []
+version_format = "v${raw}"
+
+[erlang]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-red"
+detect_extensions = ["erl", "hrl"]
+detect_files = ["rebar.config", "erlang.mk"]
+detect_folders = []
+version_format = "v${raw}"
+
+[elm]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-cyan"
+detect_extensions = ["elm"]
+detect_files = ["elm.json", "elm-package.json"]
+detect_folders = ["elm-stuff"]
+version_format = "v${raw}"
+
+[julia]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-purple"
+detect_extensions = ["jl"]
+detect_files = ["Project.toml", "Manifest.toml"]
+detect_folders = []
+version_format = "v${raw}"
+
+[lua]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["lua"]
+detect_files = [".lua-version", ".luacheckrc"]
+detect_folders = ["lua_modules"]
+version_format = "v${raw}"
+
+[perl]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["pl", "pm", "pod"]
+detect_files = ["cpanfile", "META.json", "META.yml", ".perl-version"]
+version_format = "v${raw}"
+
+[raku]
+format = '[${symbol}(${version}-${vm_version} )]($style)'
+symbol = "󱗿 "
+style = "bold bright-red"
+detect_extensions = ["raku", "rakumod", "rakutest", "p6", "pm6", "pod6"]
+detect_files = ["META6.json"]
+version_format = "v${raw}"
+
+[nim]
+format = '[${symbol}(${version} )]($style)'
+symbol = "󰆥 "
+style = "bold bright-yellow"
+detect_extensions = ["nim", "nims", "nimble"]
+detect_files = ["nim.cfg"]
+version_format = "v${raw}"
+
+[crystal]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-white"
+detect_extensions = ["cr"]
+detect_files = ["shard.yml"]
+detect_folders = []
+version_format = "v${raw}"
+
+[dart]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["dart"]
+detect_files = ["pubspec.yaml", "pubspec.lock"]
+detect_folders = [".dart_tool"]
+version_format = "v${raw}"
+
+[zig]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-yellow"
+detect_extensions = ["zig"]
+detect_files = ["build.zig", "build.zig.zon"]
+detect_folders = ["zig-cache", "zig-out"]
+version_format = "v${raw}"
+
+[vlang]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["v"]
+detect_files = ["v.mod", "vpkg.json"]
+detect_folders = []
+version_format = "v${raw}"
+
+[ocaml]
+format = '[${symbol}(${version} )(\($switch_indicator$switch_name\) )]($style)'
+symbol = " "
+style = "bold bright-yellow"
+detect_extensions = ["opam", "ml", "mli", "re", "rei"]
+detect_files = ["dune", "dune-project", "jbuild", ".merlin"]
+detect_folders = ["_opam", "esy.lock"]
+version_format = "v${raw}"
+global_switch_indicator = ""
+local_switch_indicator = "*"
+
+[rlang]
+format = '[${symbol}(${version} )]($style)'
+symbol = "󰟔 "
+style = "bold bright-blue"
+detect_extensions = ["R", "Rd", "Rmd", "Rproj", "Rsx"]
+detect_files = ["DESCRIPTION", ".Rprofile"]
+detect_folders = [".Rproj.user"]
+version_format = "v${raw}"
+
+[red]
+format = '[${symbol}(${version} )]($style)'
+symbol = "🔻 "
+style = "bold bright-red"
+detect_extensions = ["red", "reds"]
+detect_files = []
+version_format = "v${raw}"
+
+[purescript]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-white"
+detect_extensions = ["purs"]
+detect_files = ["spago.dhall", "spago.yaml"]
+detect_folders = []
+version_format = "v${raw}"
+
+[deno]
+format = '[${symbol}(${version} )]($style)'
+symbol = "🦕 "
+style = "bold bright-green"
+detect_extensions = []
+detect_files = ["deno.json", "deno.jsonc", "deno.lock", "mod.ts"]
+version_format = "v${raw}"
+
+[bun]
+format = '[${symbol}(${version} )]($style)'
+symbol = "🍞 "
+style = "bold bright-white"
+detect_extensions = []
+detect_files = ["bun.lockb", "bunfig.toml"]
+version_format = "v${raw}"
+
+[cobol]
+format = '[${symbol}(${version} )]($style)'
+symbol = "⚙️ "
+style = "bold bright-blue"
+detect_extensions = ["cbl", "cob", "cpy"]
+version_format = "v${raw}"
+
+[daml]
+format = '[${symbol}(${version} )]($style)'
+symbol = "Λ "
+style = "bold bright-cyan"
+detect_extensions = ["daml"]
+detect_files = ["daml.yaml"]
+version_format = "v${raw}"
+
+[fennel]
+format = '[${symbol}(${version} )]($style)'
+symbol = "🌙 "
+style = "bold bright-yellow"
+detect_extensions = ["fnl"]
+detect_files = []
+version_format = "v${raw}"
+
+[haxe]
+format = '[${symbol}(${version} )]($style)'
+symbol = "⌘ "
+style = "bold bright-yellow"
+detect_extensions = ["hx", "hxml"]
+detect_files = ["haxelib.json", "hxformat.json", ".haxerc"]
+version_format = "v${raw}"
+
+[opa]
+format = '[${symbol}(${version} )]($style)'
+symbol = "🛡️ "
+style = "bold bright-blue"
+detect_extensions = ["rego"]
+detect_files = [".manifest"]
+version_format = "v${raw}"
+
+[quarto]
+format = '[${symbol}(${version} )]($style)'
+symbol = "⨁ "
+style = "bold bright-blue"
+detect_extensions = ["qmd"]
+detect_files = ["_quarto.yml"]
+version_format = "v${raw}"
+
+[solidity]
+format = '[${symbol}(${version} )]($style)'
+symbol = "S "
+style = "bold bright-blue"
+detect_extensions = ["sol"]
+detect_files = ["hardhat.config.js", "hardhat.config.ts", "foundry.toml"]
+version_format = "v${raw}"
+
+[typst]
+format = '[${symbol}(${version} )]($style)'
+symbol = "t "
+style = "bold bright-cyan"
+detect_extensions = ["typ"]
+version_format = "v${raw}"
+
+# ============================================================================
+# BUILD TOOLS & PACKAGE MANAGERS
+# ============================================================================
+
+[package]
+format = '[󰏗 $version]($style) '
+symbol = "󰏗 "
+style = "bold bright-yellow"
+display_private = false
+version_format = "v${raw}"
+
+[gradle]
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["gradle", "gradle.kts"]
+detect_files = ["build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts"]
+detect_folders = ["gradle"]
+recursive = false
+version_format = "v${raw}"
 
 [meson]
-symbol = "meson "
-format = '[$symbol$project]($style) '
-style = "bright-blue bold"
-detect_extensions = ["meson.build"]
-detect_files = ["meson.build"]
-detect_folders = ["meson", "build"]
-
-[spack]
-symbol = "spack "
-format = '[$symbol$environment]($style) '
-style = "bright-blue bold"
-detect_files = ["spack.yaml", "spack.lock"]
-
-[memory_usage]
-symbol = "memory "
-format = "$symbol[$ram( | $swap)]($style) "
-style = "bright-white bold dimmed"
-threshold = -1
-
-[battery]
-full_symbol = ""
-charging_symbol = ""
-discharging_symbol = ""
-unknown_symbol = ""
-empty_symbol = ""
-format = '[$symbol$percentage]($style) '
-style = "bright-red bold"
-display = ["threshold"]
-threshold = 20
+format = '[${symbol}$project]($style) '
+symbol = "󰔷 "
+style = "bold bright-blue"
+truncation_length = 25
+truncation_symbol = "…"
 
 [buf]
-symbol = "buf "
-format = '[$symbol($version )]($style)'
-style = "bright-purple bold"
+format = '[${symbol}(${version} )]($style)'
+symbol = " "
+style = "bold bright-blue"
+detect_extensions = ["proto"]
 detect_files = ["buf.yaml", "buf.gen.yaml", "buf.work.yaml"]
+version_format = "v${raw}"
 
-detect_folders = ["proto", "protos"]
+# ============================================================================
+# CONTAINERS & ORCHESTRATION
+# ============================================================================
 
-[nix_shell]
-symbol = "nix "
-format = '[$symbol$state( \($name\))]($style) '
-style = "bright-blue bold"
-impure_msg = "[impure]"
-pure_msg = "[pure]"
-
-[os]
-disabled = true
-format = "[$symbol]($style)"
-style = "bold white"
+[docker_context]
+format = '[󰡨 $context]($style) '
+symbol = "󰡨 "
+style = "bold bright-blue"
+only_with_files = true
+detect_extensions = []
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml", "Dockerfile"]
+detect_folders = []
 
 [container]
-symbol = ""
-format = '[$symbol \[$name\]]($style) '
-style = "bright-red bold dimmed"
+format = '[$symbol\[$name\]]($style) '
+symbol = "󰏖 "
+style = "bold bright-red dimmed"
 
-detect_files = [".dockerenv", "/proc/1/cgroup"]
+[kubernetes]
+format = '[󱃾 ${symbol}${context}( \(${namespace}\))]($style) '
+symbol = "󱃾 "
+style = "bold bright-cyan"
+disabled = false
+
+[helm]
+format = '[${symbol}(${version} )]($style)'
+symbol = "⎈ "
+style = "bold bright-white"
+detect_extensions = []
+detect_files = ["helmfile.yaml", "Chart.yaml"]
+detect_folders = ["charts"]
+version_format = "v${raw}"
+
+# ============================================================================
+# CLOUD PROVIDERS
+# ============================================================================
+
+[aws]
+format = '[󰸏 ($profile )(\($region\) )(\[$duration\] )]($style)'
+symbol = "󰸏 "
+style = "bold bright-yellow"
+force_display = false
+
+[gcloud]
+format = '[󱇶 $symbol$account(@$domain)(\($region\))]($style) '
+symbol = "󱇶 "
+style = "bold bright-blue"
+
+[azure]
+format = '[󰠅 ($subscription)]($style) '
+symbol = "󰠅 "
+style = "bold bright-blue"
+disabled = false
+
+[openstack]
+format = '[󰽙 $cloud(\($project\))]($style) '
+symbol = "󰽙 "
+style = "bold bright-yellow"
+
+[pulumi]
+format = '[🧱 ($version $stack)]($style) '
+symbol = "🧱 "
+style = "bold bright-yellow"
+version_format = "v${raw}"
+
+# ============================================================================
+# INFRASTRUCTURE AS CODE
+# ============================================================================
+
+[terraform]
+format = '[󱁢 ${symbol}${workspace}]($style) '
+symbol = "󱁢 "
+style = "bold bright-purple"
+detect_extensions = ["tf", "tfplan", "tfstate"]
+detect_files = [".terraform-version", "main.tf"]
+detect_folders = [".terraform"]
+version_format = "v${raw}"
+
+[vagrant]
+format = '[${symbol}(${version} )]($style)'
+symbol = "⍱ "
+style = "bold bright-cyan"
+detect_extensions = []
+detect_files = ["Vagrantfile"]
+detect_folders = []
+version_format = "v${raw}"
+
+# ============================================================================
+# VIRTUAL ENVIRONMENTS
+# ============================================================================
+
+[conda]
+format = '[$symbol$environment]($style) '
+symbol = "󱔎 "
+style = "bold bright-green"
+truncation_length = 20
+ignore_base = true
+
+[nix_shell]
+format = '[$symbol$state( \($name\))]($style) '
+symbol = " "
+style = "bold bright-blue"
+impure_msg = "[impure]"
+pure_msg = "[pure]"
+unknown_msg = ""
+heuristic = false
+
+[spack]
+format = '[$symbol$environment]($style) '
+symbol = "🅢 "
+style = "bold bright-blue"
+truncation_length = 20
+
+[vcsh]
+format = 'vcsh [$symbol$repo]($style) '
+symbol = " "
+style = "bold bright-yellow"
+
+[guix_shell]
+format = '[$symbol]($style) '
+symbol = " "
+style = "bold bright-yellow"
+
+[direnv]
+format = '[$symbol$loaded/$allowed]($style) '
+symbol = " "
+style = "bold bright-yellow"
+disabled = false
+detect_extensions = []
+detect_files = [".envrc"]
+detect_folders = []
+allowed_msg = ""
+denied_msg = "✗"
+loaded_msg = ""
+unloaded_msg = ""
+
+# ============================================================================
+# SYSTEM RESOURCES
+# ============================================================================
+
+[memory_usage]
+format = '[$symbol${ram}( | ${swap})]($style) '
+symbol = "󰍛 "
+style = "bold bright-white dimmed"
+threshold = 75
+disabled = false
+
+[battery]
+format = '[$symbol$percentage]($style) '
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+disabled = false
+
+[[battery.display]]
+threshold = 15
+style = "bold bright-red"
+
+[[battery.display]]
+threshold = 30
+style = "bold bright-yellow"
+
+[[battery.display]]
+threshold = 100
+style = "bold bright-green"
+
+# ============================================================================
+# PROMPT UTILITIES
+# ============================================================================
+
+[fill]
+symbol = "─"
+style = "bold bright-black"
+
+[jobs]
+format = '[$symbol$number]($style) '
+symbol = "󰜎 "
+style = "bold bright-blue"
+number_threshold = 1
+symbol_threshold = 1
+
+[time]
+format = '[󰥔 $time]($style) '
+style = "bold bright-white"
+time_format = "%H:%M:%S"
+use_12hr = false
+disabled = false
+utc_time_offset = "local"
+
+[status]
+format = '[$symbol$status]($style) '
+symbol = "󰅚 "
+success_symbol = ""
+not_executable_symbol = "󰂭 "
+not_found_symbol = "󰍉 "
+sigint_symbol = "󱚡 "
+signal_symbol = "󱐋 "
+style = "bold bright-red"
+map_symbol = true
+recognize_signal_code = true
+pipestatus = true
+pipestatus_format = '\[$pipestatus\] => [$symbol$common_meaning$signal_name$maybe_int]($style)'
+pipestatus_separator = '|'
+disabled = false
+
+[cmd_duration]
+format = '[󱦟 $duration]($style) '
+min_time = 500
+style = "bold bright-yellow"
+show_milliseconds = false
+show_notifications = false
+min_time_to_notify = 45000
 
 [sudo]
-format = '[as $symbol]($style) '
-symbol = ""
-style = "bright-red bold"
+format = '[󰯄 as $symbol]($style)'
+symbol = "󰯄 "
+style = "bold bright-red"
+allow_windows = false
 disabled = false
+
+[character]
+format = "$symbol "
+success_symbol = "[❯](bold bright-green)"
+error_symbol = "[❯](bold bright-red)"
+vimcmd_symbol = "[❮](bold bright-green)"
+vimcmd_replace_one_symbol = "[❮](bold bright-purple)"
+vimcmd_replace_symbol = "[❮](bold bright-purple)"
+vimcmd_visual_symbol = "[❮](bold bright-yellow)"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES
+# ============================================================================
+
+[env_var]
+disabled = true

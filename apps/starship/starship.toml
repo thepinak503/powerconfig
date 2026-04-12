@@ -1,0 +1,134 @@
+# =============================================================================
+# STARSHIP PROMPT - Ultimate Tokyo Night Configuration
+# =============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+format = """
+[░▒▓](#c0caf5)\
+[  ](bg:#7aa2f7 fg:#1a1b26)\
+[](bg:#9ece6a fg:#7aa2f7)\
+$directory\
+[](fg:#9ece6a bg:#3d59a1)\
+$git_branch\
+$git_commit\
+$git_status\
+[](fg:#3d59a1 bg:#24283b)\
+$python\
+$rust\
+$golang\
+$nodejs\
+$java\
+$package\
+$docker_context\
+$kubernetes\
+[](fg:#24283b bg:#1f2335)\
+$time\
+$custom\
+$battery\
+$cmd_duration\
+[▓▒░](fg:#1f2335)\
+$character"""
+
+right_format = """$shell$jobs$node_env"""
+
+add_newline = true
+scan_timeout = 10
+command_timeout = 5000
+
+[shell]
+style = "fg:#565f89"
+format = "[$symbol($version)]($style)"
+disabled = false
+unknown_symbol = "?"
+
+[jobs]
+style = "fg:#565f89"
+format = "[$number]($style) "
+
+[directory]
+style = "fg:#c0caf5 bg:#7aa2f7"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~/"
+
+[directory.substitutions]
+"Documents" = " 📄"
+"Downloads" = " ⬇"
+"Music" = " 🎵"
+"Pictures" = " 🖼"
+"Videos" = " 🎬"
+"Desktop" = " 🖥"
+"Projects" = " 💼"
+"GitHub" = " 🐙"
+
+[git_branch]
+symbol = "  "
+style = "bg:#3d59a1"
+format = "[$symbol$branch]($style)"
+
+[git_status]
+style = "bg:#3d59a1"
+format = "[$all_status$ahead_behind]($style)"
+conflicted = " 󰞇"
+ahead = " 󰜷"
+behind = " 󰜮"
+untracked = " 󰋗"
+stashed = " 󰏗"
+modified = " 󰝶"
+staged = " 󰐖"
+renamed = " 󰑕"
+deleted = " 󰍴"
+
+[python]
+symbol = " "
+style = "bg:#24283b"
+format = "[$symbol($version )](fg:#9d7cd8 bg:#24283b)"
+
+[rust]
+symbol = " 󱘗"
+style = "bg:#24283b"
+format = "[$symbol ($version)](fg:#ff9e64 bg:#24283b)"
+
+[nodejs]
+symbol = " 󰌷"
+style = "bg:#24283b"
+format = "[$symbol ($version)](fg:#9ece6a bg:#24283b)"
+
+[docker_context]
+symbol = " "
+style = "bg:#24283b"
+format = "[$symbol ($context)](fg:#79d4f9 bg:#24283b)"
+
+[kubernetes]
+symbol = " ☸ "
+style = "bg:#24283b"
+format = "[$symbol $context]($style)"
+disabled = false
+
+[time]
+disabled = false
+time_format = "%Y-%m-%d %I:%M:%S %p"
+style = "fg:#a9b1d6 bg:#1f2335"
+format = "[ 󱑀 $time ]($style)"
+
+[battery]
+format = "[$symbol$percentage]($style)"
+full_symbol = " 󰁹"
+charging_symbol = " 󰂄"
+discharging_symbol = " 󱧒"
+style = "fg:#a9b1d6"
+
+[character]
+success_symbol = "[❯](bold #9ece6a)"
+error_symbol = "[✗](bold #f7768e)"
+
+[custom.identity]
+command = '''
+$is_admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($is_admin) { "CAUTION!! you are admin!!" } else { "you are $env:USERNAME" }
+'''
+shell = ["powershell", "-Command"]
+style = "fg:#a9b1d6 bg:#1f2335"
+format = "[ $output ]($style)"
+when = "true"

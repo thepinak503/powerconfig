@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerConfig Docs</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="minimal">
+    
+    <div class="container">
+        <header>
+            <h1>PowerConfig</h1>
+            <p>Performance-focused PowerShell suite.</p>
+        </header>
+
+        <section class="install">
+            <code>irm https://raw.githubusercontent.com/thepinak503/powerconfig/main/install/install.ps1 | iex</code>
+        </section>
+
+        <section class="search">
+            <input type="text" id="cmd-search" placeholder="Filter commands...">
+        </section>
+
+        <table id="cmd-table">
+            <thead>
+                <tr>
+                    <th>Command</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <footer>
+            <p><a href="https://github.com/thepinak503/powerconfig">GitHub Repository</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

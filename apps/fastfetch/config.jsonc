@@ -1,0 +1,34 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "padding": { "top": 1, "left": 2, "right": 1 },
+        "width": 32, "height": 17
+    },
+    "display": {
+        "separator": "  ➜  ",
+        "color": { "keys": "cyan", "title": "blue" },
+        "size": { "binaryPrefix": "si" },
+        "percent": { "type": 2 }
+    },
+    "modules": [
+        { "type": "title", "key": "", "keyColor": "magenta" },
+        { "type": "os", "key": "│ 󰣇  OS        ", "keyColor": "yellow" },
+        { "type": "kernel", "key": "│ 󰌽  Kernel    ", "keyColor": "yellow" },
+        { "type": "host", "key": "│ 󰌢  Host      ", "keyColor": "yellow" },
+        { "type": "uptime", "key": "│ 󰔚  Uptime    ", "keyColor": "yellow" },
+        { "type": "packages", "key": "│ 󰏗  Packages  ", "keyColor": "yellow" },
+        { "type": "shell", "key": "│ 󰆍  Shell     ", "keyColor": "yellow" },
+        { "type": "wm", "key": "│ 󰧨  WM        ", "keyColor": "green" },
+        { "type": "terminal", "key": "│ 󰆍  Terminal  ", "keyColor": "green" },
+        { "type": "terminalFont", "key": "│ 󰛖  Font      ", "keyColor": "green" },
+        { "type": "cpu", "key": "│ 󰻠  CPU       ", "keyColor": "blue", "temp": true },
+        { "type": "gpu", "key": "│ 󰢮  GPU       ", "keyColor": "blue", "temp": true },
+        { "type": "memory", "key": "│ 󰍛  Memory    ", "keyColor": "blue" },
+        { "type": "swap", "key": "│ 󰑠  Swap      ", "keyColor": "blue" },
+        { "type": "disk", "key": "│ 󰋊  Disk      ", "keyColor": "blue" },
+        { "type": "battery", "key": "│ 󰁹  Battery   ", "keyColor": "blue" },
+        { "type": "localip", "key": "│ 󰖩  Local IP  ", "keyColor": "blue", "showIpv6": false },
+        { "type": "publicip", "key": "│ 󰯻  Public IP ", "keyColor": "blue", "timeout": 3000 },
+        { "type": "colors", "symbol": "circle", "paddingLeft": 4 }
+    ]
+}

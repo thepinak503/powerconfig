@@ -4,6 +4,15 @@
 # Inspired by Chris Titus Tech & thepinak503/dotfiles
 # =============================================================================
 
+# Opt-out of telemetry
+$env:POWERSHELL_TELEMETRY_OPTOUT = "true"
+
+# Add starship to PATH if installed
+$starshipBin = "$env:ProgramFiles\starship\bin"
+if ((Test-Path $starshipBin) -and ($env:Path -notlike "*$starshipBin*")) {
+    $env:Path = "$starshipBin;$env:Path"
+}
+
 # Define Root Directory
 $env:POWERCONFIG_DIR = $PSScriptRoot
 

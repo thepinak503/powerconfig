@@ -266,9 +266,9 @@ Set-Alias -Name egit -Value egit
 function genpass {
     param([int]$Length = 16)
     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
-    -join ((1..$Length) | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })
+    $result = -join ((1..$Length) | ForEach-Object { $chars[(Get-Random -Maximum $chars.Length)] })
+    Write-Host $result
 }
-Set-Alias -Name genpass -Value genpass
 
 function killport {
     param([int]$Port)

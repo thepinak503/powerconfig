@@ -1,6 +1,6 @@
 # =============================================================================
-# PowerConfig Universal Installer v5.0
-# Uses $PROFILE variable for correct paths
+# PowerConfig Universal Installer v6.2
+# Creates profile, modifies path, copies content
 # =============================================================================
 
 $ErrorActionPreference = "Continue"
@@ -59,9 +59,16 @@ function Set-WindowsTerminalFont {
     }
 }
 
+function Install-IfNeeded {
+    param([string]$Name, [string]$WingetId)
+    if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
+        try { winget install -e --id $WingetId --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null } catch { }
+    }
+}
+
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       POWERCONFIG INSTALLER v5.0                   ║" -ForegroundColor Cyan
+Write-Host "║       POWERCONFIG INSTALLER v6.2                   ║" -ForegroundColor Cyan
 Write-Host "╚═══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
@@ -83,26 +90,29 @@ if (-not (Test-Path $InstallDir)) {
     exit 1
 }
 
-Write-Host "[OK] Cloned to $InstallDir" -ForegroundColor Green
+Write-Host "[OK] Cloned" -ForegroundColor Green
+
+$repoProfile = Join-Path $InstallDir "Microsoft.PowerShell_profile.ps1"
+if (-not (Test-Path $repoProfile)) {
+    Write-Host "[ERROR] Profile not found in repo!" -ForegroundColor Red
+    exit 1
+}
 
 Write-Host ""
 Write-Host "[INFO] Installing profiles..." -ForegroundColor Cyan
 
-$escapedDir = $InstallDir -replace '\\', '\\'
+$escapedInstallDir = $InstallDir -replace '\\', '\\'
 
-$profileContent = @"
-# PowerConfig Profile v5.0
-`$env:POWERCONFIG_DIR = "$escapedDir"
-`$env:STARSHIP_CONFIG = Join-Path (`$env:USERPROFILE) ".config\starship.toml"
+$profileContent = Get-Content $repoProfile -Raw
 
-`$mainProfile = Join-Path (`$env:POWERCONFIG_DIR) "Microsoft.PowerShell_profile.ps1"
-if (Test-Path `$mainProfile) {
-    . `$mainProfile
-}
-"@
+$profileContent = $profileContent -replace '\$env:POWERCONFIG_DIR\s*=\s*\$PSScriptRoot', "`$env:POWERCONFIG_DIR = `"$escapedInstallDir`""
+
+$profileContent = $profileContent -replace '\$env:STARSHIP_CONFIG\s*=\s*Join-Path.*\.config', "`$env:STARSHIP_CONFIG = Join-Path (`$env:USERPROFILE) `.config\starship.toml`""
+
+Write-Host "[DEBUG] Modified profile content" -ForegroundColor Yellow
 
 function Install-ProfileForShell {
-    param([string]$ShellType)
+    param([string]$ShellType, [string]$Content)
     
     if ($ShellType -eq "Desktop") {
         $basePath = "$env:USERPROFILE\Documents\WindowsPowerShell"
@@ -120,18 +130,18 @@ function Install-ProfileForShell {
     if (-not (Test-Path $allHostsProfile)) {
         New-Item -Path $allHostsProfile -Type File -Force | Out-Null
     }
-    Set-Content -Path $allHostsProfile -Value $profileContent -Encoding UTF8
+    Set-Content -Path $allHostsProfile -Value $Content -Encoding UTF8
     
     if (-not (Test-Path $currentHostProfile)) {
         New-Item -Path $currentHostProfile -Type File -Force | Out-Null
     }
-    Set-Content -Path $currentHostProfile -Value $profileContent -Encoding UTF8
+    Set-Content -Path $currentHostProfile -Value $Content -Encoding UTF8
     
-    Write-Host "  [OK] $ShellType profiles installed" -ForegroundColor Green
+    Write-Host "  [OK] $ShellType profile created" -ForegroundColor Green
 }
 
-Install-ProfileForShell -ShellType "Desktop"
-Install-ProfileForShell -ShellType "Core"
+Install-ProfileForShell -ShellType "Desktop" -Content $profileContent
+Install-ProfileForShell -ShellType "Core" -Content $profileContent
 
 $configDir = "$env:USERPROFILE\.config"
 if (-not (Test-Path $configDir)) { New-Item -Path $configDir -ItemType Directory -Force | Out-Null }
@@ -139,23 +149,14 @@ if (-not (Test-Path $configDir)) { New-Item -Path $configDir -ItemType Directory
 $starshipSource = Join-Path $InstallDir "apps\starship\starship.toml"
 if (Test-Path $starshipSource) {
     Copy-Item -Path $starshipSource -Destination "$configDir\starship.toml" -Force
-    Write-Host "[OK] Starship config" -ForegroundColor Green
+    Write-Host "[OK] Starship config installed" -ForegroundColor Green
 }
 
 Write-Host ""
 Write-Host "[INFO] Installing dependencies..." -ForegroundColor Cyan
-
-function Install-IfNeeded {
-    param([string]$Name, [string]$WingetId)
-    if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-        try { winget install -e --id $WingetId --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null } catch { }
-    }
-}
-
 Install-IfNeeded -Name "git" -WingetId "Git.Git"
 Install-IfNeeded -Name "starship" -WingetId "Starship.Starship"
 Install-IfNeeded -Name "zoxide" -WingetId "ajeetdsouza.zoxide"
-
 try { Install-Module -Name Terminal-Icons -Repository PSGallery -Force 2>&1 | Out-Null } catch { }
 
 Write-Host ""
@@ -166,7 +167,7 @@ Set-WindowsTerminalFont
 Write-Host ""
 Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
 Write-Host "[SUCCESS] Installation Complete!" -ForegroundColor Green
-Write-Host "════════════════════════��══════════════════════════════════" -ForegroundColor Green
+Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
 Write-Host ""
 Write-Host "Restart PowerShell or: . `$PROFILE" -ForegroundColor Cyan
 Write-Host ""

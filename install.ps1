@@ -190,10 +190,10 @@ $env:POWERCONFIG_MODE = "standard"
     $hostProfile = Join-Path $targetDir "Microsoft.PowerShell_profile.ps1"
     $srcDir = Join-Path $targetDir "src"
     
-    $profilePath | New-Item -Type File -Force | Out-Null
+    $profilePath | New-Item -Path $profilePath -ItemType File -Force | Out-Null
     Set-Content -Path $profilePath -Value $profileContent -Encoding UTF8
     
-    $hostProfile | New-Item -Type File -Force | Out-Null
+    $hostProfile | New-Item -Path $hostProfile -ItemType File -Force | Out-Null
     Set-Content -Path $hostProfile -Value $profileContent -Encoding UTF8
     
     if (Test-Path $srcDir) { Remove-Item $srcDir -Recurse -Force }

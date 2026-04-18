@@ -157,7 +157,13 @@ Write-Host "[INSTALL] Installing profiles..." -ForegroundColor Cyan
 
 $profileContent = @'
 # PowerConfig Profile
-$env:POWERCONFIG_DIR = $PSScriptRoot
+$ScriptRoot = if ($PSVersionTable.PSEdition -eq "Core") {
+    "$env:USERPROFILE\Documents\PowerShell"
+} else {
+    "$env:USERPROFILE\Documents\WindowsPowerShell"
+}
+
+$env:POWERCONFIG_DIR = $ScriptRoot
 $env:STARSHIP_CONFIG = Join-Path ($env:USERPROFILE) ".config\starship.toml"
 
 $starshipBin = "$env:ProgramFiles\starship\bin"
@@ -170,7 +176,7 @@ if (-not (Test-Path $DOTFILES_DIR)) {
     New-Item -ItemType Directory -Path $DOTFILES_DIR -Force | Out-Null
 }
 
-$SRC_DIR = Join-Path $PSScriptRoot "src"
+$SRC_DIR = Join-Path $ScriptRoot "src"
 Get-ChildItem -Path $SRC_DIR -Filter "*.ps1" -EA SilentlyContinue | Sort-Object Name | ForEach-Object {
     . $_.FullName
 }

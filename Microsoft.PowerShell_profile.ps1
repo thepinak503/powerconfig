@@ -68,7 +68,6 @@ if (Test-Path $stateFile) {
 } else {
     $env:POWERCONFIG_MODE = "standard"
 }
-}
 
 # -----------------------------------------------------------------------------
 # DOCS HELPER

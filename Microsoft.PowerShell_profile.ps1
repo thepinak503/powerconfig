@@ -47,4 +47,9 @@ if (Test-Path $LOCAL_PROFILE) {
 # -----------------------------------------------------------------------------
 # STARTUP
 # -----------------------------------------------------------------------------
-if (Get-Command fastfetch -ErrorAction SilentlyContinue) { fastfetch }
+if (Get-Command fastfetch -ErrorAction SilentlyContinue) { 
+    if (-not $env:POWERCONFIG_FASTFETCH_RUN) {
+        $env:POWERCONFIG_FASTFETCH_RUN = "1"
+        fastfetch 
+    }
+}

@@ -117,7 +117,14 @@ function Install-ProfileForShell {
     $allHostsProfile = Join-Path $basePath "profile.ps1"
     $currentHostProfile = Join-Path $basePath "Microsoft.PowerShell_profile.ps1"
     
+    if (-not (Test-Path $allHostsProfile)) {
+        New-Item -Path $allHostsProfile -Type File -Force | Out-Null
+    }
     Set-Content -Path $allHostsProfile -Value $profileContent -Encoding UTF8
+    
+    if (-not (Test-Path $currentHostProfile)) {
+        New-Item -Path $currentHostProfile -Type File -Force | Out-Null
+    }
     Set-Content -Path $currentHostProfile -Value $profileContent -Encoding UTF8
     
     Write-Host "  [OK] $ShellType profiles installed" -ForegroundColor Green

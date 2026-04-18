@@ -69,26 +69,31 @@ function extract {
     $extension = [System.IO.Path]::GetExtension($Path).ToLower()
     $baseName = [System.IO.Path]::GetFileNameWithoutExtension($Path)
     
-    switch -Regex ($extension) {
-        '\.zip$' {
+    switch ($extension) {
+        ".zip" {
             Expand-Archive -Path $Path -DestinationPath $baseName -Force
             Write-Host "[OK] Extracted: $baseName" -ForegroundColor Green
         }
-        '\.tar\.gz$' - '\.tgz$' {
+        ".tar.gz" {
             $outDir = $baseName -replace '\.tar\.gz$', ''
             tar -xzf $Path -C $outDir
             Write-Host "[OK] Extracted: $outDir" -ForegroundColor Green
         }
-        '\.tar$' {
+        ".tgz" {
+            $outDir = $baseName
+            tar -xzf $Path -C $outDir
+            Write-Host "[OK] Extracted: $outDir" -ForegroundColor Green
+        }
+        ".tar" {
             $outDir = $baseName
             tar -xf $Path -C $outDir
             Write-Host "[OK] Extracted: $outDir" -ForegroundColor Green
         }
-        '\.7z$' {
+        ".7z" {
             7z x $Path -o$baseName
             Write-Host "[OK] Extracted: $baseName" -ForegroundColor Green
         }
-        Default {
+        default {
             Write-Host "[ERROR] Unknown format: $extension" -ForegroundColor Red
         }
     }
@@ -296,6 +301,96 @@ function trash {
     }
 }
 Set-Alias -Name trash -Value trash
+
+# -----------------------------------------------------------------------------
+# DOTFILES MODE SYSTEM (like thepinak503/dotfiles)
+# -----------------------------------------------------------------------------
+function chmode {
+    param(
+        [ValidateSet("basic", "minimal", "standard", "supreme", "ultra-nerd")]
+        [string]$Mode = "standard"
+    )
+    $env:POWERCONFIG_MODE = $Mode
+    $stateFile = "$env:USERPROFILE\.config\powerconfig-mode"
+    $stateDir = Split-Path $stateFile -Parent
+    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
+    Set-Content -Path $stateFile -Value $Mode
+    Write-Host "[OK] Mode set to: $Mode" -ForegroundColor Green
+    Write-Host "Restart PowerShell or run 'reload' to apply" -ForegroundColor Cyan
+}
+
+# Quick directory jumping
+function cdp { Set-Location "$env:USERPROFILE\Documents\projects" }
+function cdcode { Set-Location "$env:USERPROFILE\Documents\code" }
+Set-Alias -Name cdp -Value cdp
+Set-Alias -Name cdcode -Value cdcode
+
+# Docker full aliases
+function d { docker @args }
+function dbuild { docker build -t $args[0] . }
+function dclean { docker system prune -af }
+function dprune { docker system prune -f }
+Set-Alias -Name dbuild -Value dbuild
+Set-Alias -Name dclean -Value dclean
+Set-Alias -Name dprune -Value dprune
+
+# Git functions (like thepinak503/dotfiles)
+function ga { git add @args }
+function gs { git status }
+function gc { git commit -m @args }
+function gp { git push }
+function gpl { git pull }
+function gd { git diff }
+function gco { git checkout @args }
+function gb { git branch }
+function gf { git fetch }
+function gm { git merge }
+function gr { git rebase }
+function gst { git stash }
+function gl { git log }
+function gb { git branch }
+
+# Kubernetes full functions
+function kgall { kubectl get all }
+function kga { kubectl get all --all-namespaces }
+function kdelp { kubectl delete pod @args }
+function klogs { kubectl logs -f @args }
+function kex { kubectl exec -it @args }
+function kpf { kubectl port-forward @args }
+Set-Alias -Name kgall -Value kgall
+Set-Alias -Name kga -Value kga
+Set-Alias -Name kdelp -Value kdelp
+Set-Alias -Name klogs -Value klogs
+Set-Alias -Name kex -Value kex
+Set-Alias -Name kpf -Value kpf
+
+# Terraform aliases
+function tf { terraform @args }
+function tfi { terraform init }
+function tfp { terraform plan }
+function tfa { terraform apply }
+function tfd { terraform destroy }
+Set-Alias -Name tf -Value tf
+Set-Alias -Name tfi -Value tfi
+Set-Alias -Name tfp -Value tfp
+Set-Alias -Name tfa -Value tfa
+Set-Alias -Name tfd -Value tfd
+
+# NPM shortcuts
+function npi { npm install }
+function npid { npm install -D }
+function nrx { npm run }
+function nrt { npm run test }
+function nrd { npm run dev }
+function ns { npm start }
+function nt { npm test }
+function nd { npm run dev }
+
+# Search functions
+function ff { Get-ChildItem -Recurse -Filter "*$args[0]*" | Select-Object FullName }
+function ffr { Get-ChildItem -Recurse -File | Select-String $args[0] | Select-Object Filename, LineNumber }
+Set-Alias -Name ff -Value ff
+Set-Alias -Name ffr -Value ffr
 
 # Mega Functions loaded!
 Write-Host "[OK] MegaFunctions loaded" -ForegroundColor Green

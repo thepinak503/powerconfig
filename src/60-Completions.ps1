@@ -1,9 +1,9 @@
 # PowerConfig Completions - PSReadLine & Completers
 
-# PSReadLine Options (Inspired by CTT) - PowerShell 7+ only
-if (Get-Module PSReadLine -ListAvailable) {
-    $PSReadLineModule = Get-Module PSReadLine
-    if ($PSReadLineModule.Version -ge [version]"2.0.0") {
+# PSReadLine Options (PowerShell 7+ only)
+$PSReadLineModule = Get-Module PSReadLine -ListAvailable
+if ($PSReadLineModule -and $PSVersionTable.PSEdition -eq "Core") {
+    try {
         Set-PSReadLineOption -EditMode Windows -ErrorAction SilentlyContinue
         Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue
         Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction SilentlyContinue
@@ -20,7 +20,7 @@ if (Get-Module PSReadLine -ListAvailable) {
         Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete -ErrorAction SilentlyContinue
         Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward -ErrorAction SilentlyContinue
         Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward -ErrorAction SilentlyContinue
-    }
+    } catch { }
 }
 
 # Native Argument Completers

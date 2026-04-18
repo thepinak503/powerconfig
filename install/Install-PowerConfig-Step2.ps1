@@ -1,6 +1,6 @@
 # =============================================================================
-# PowerConfig Universal Installer v7.0
-# Installs full folder structure to Documents\PowerShell & WindowsPowerShell
+# PowerConfig Installer - STEP 2
+# Full Installation (after Git is ready)
 # =============================================================================
 
 $ErrorActionPreference = "Continue"
@@ -8,10 +8,6 @@ $ErrorActionPreference = "Continue"
 if (-not $IsWindows) {
     Write-Host "This installer is for Windows only." -ForegroundColor Yellow
     exit 0
-}
-
-if (-not ([Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtocolType]::Tls12)) {
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 }
 
 $ProgressPreference = "SilentlyContinue"
@@ -37,11 +33,11 @@ function Install-Font {
                 if (-not (Test-Path "C:\Windows\Fonts\$($_.Name)")) { $dest.CopyHere($_.FullName, 0x10) }
             }
             Remove-Item -Path "$env:TEMP\${FontName}*" -Recurse -Force -ErrorAction SilentlyContinue
-            Write-Host "[OK] $FontDisplayName installed" -ForegroundColor Green
+            Write-Host "  [OK] $FontDisplayName installed" -ForegroundColor Green
         } else {
-            Write-Host "[SKIP] $FontDisplayName already installed" -ForegroundColor Gray
+            Write-Host "  [SKIP] $FontDisplayName already installed" -ForegroundColor Gray
         }
-    } catch { Write-Host "[WARN] Font: $_" -ForegroundColor Yellow }
+    } catch { Write-Host "  [WARN] Font: $_" -ForegroundColor Yellow }
 }
 
 function Set-WindowsTerminalFont {
@@ -54,7 +50,7 @@ function Set-WindowsTerminalFont {
             if ($settings.defaults) { $settings.defaults | Add-Member -NotePropertyName "font" -NotePropertyValue $fontObj -Force -ErrorAction SilentlyContinue }
             else { $settings | Add-Member -NotePropertyName "defaults" -NotePropertyValue @{font = $fontObj} -Force -ErrorAction SilentlyContinue }
             Set-Content -Path $settingsFile -Value ($settings | ConvertTo-Json -Depth 10) -Encoding UTF8
-            Write-Host "[OK] Windows Terminal font set" -ForegroundColor Green
+            Write-Host "  [OK] Windows Terminal font set" -ForegroundColor Green
         } catch { }
     }
 }
@@ -62,14 +58,16 @@ function Set-WindowsTerminalFont {
 function Install-IfNeeded {
     param([string]$Name, [string]$WingetId)
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
+        Write-Host "  Installing $Name..." -ForegroundColor Cyan
         try { winget install -e --id $WingetId --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null } catch { }
+    } else {
+        Write-Host "  [SKIP] $Name already installed" -ForegroundColor Gray
     }
 }
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       POWERCONFIG INSTALLER v7.1                   ║" -ForegroundColor Cyan
-Write-Host "║       Full Folder Structure Installation        ║" -ForegroundColor Cyan
+Write-Host "║       POWERCONFIG - STEP 2: FULL INSTALL         ║" -ForegroundColor Cyan
 Write-Host "╚═══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
@@ -78,7 +76,7 @@ if (-not (Test-InternetConnection)) {
     exit 1
 }
 
-Write-Host "[INFO] Cloning PowerConfig..." -ForegroundColor Cyan
+Write-Host "[CHECK] Cloning PowerConfig..." -ForegroundColor Cyan
 if (-not (Test-Path $InstallDir)) {
     $gitDir = Split-Path $InstallDir
     if (-not (Test-Path $gitDir)) { New-Item -Path $gitDir -ItemType Directory -Force | Out-Null }
@@ -90,15 +88,13 @@ if (-not (Test-Path $InstallDir)) {
     exit 1
 }
 
-Write-Host "[OK] Cloned" -ForegroundColor Green
+Write-Host "[OK] Cloned: $InstallDir" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "[INFO] Installing to PowerShell folders..." -ForegroundColor Cyan
 
-$escapedDir = $InstallDir -replace '\\', '\\'
-
 $profileContent = @'
-# PowerConfig Profile v7.0
+# PowerConfig Profile v7.1
 $env:POWERCONFIG_DIR = $PSScriptRoot
 
 $env:STARSHIP_CONFIG = Join-Path ($env:USERPROFILE) ".config\starship.toml"
@@ -126,14 +122,14 @@ $env:POWERCONFIG_MODE = "standard"
 '@
 
 $allShells = @(
-    @{Name="Core"; Dir="$env:USERPROFILE\Documents\PowerShell"},
-    @{Name="Desktop"; Dir="$env:USERPROFILE\Documents\WindowsPowerShell"}
+    @{Name="PowerShell 7+"; Dir="$env:USERPROFILE\Documents\PowerShell"},
+    @{Name="PowerShell 5.1"; Dir="$env:USERPROFILE\Documents\WindowsPowerShell"}
 )
 
 foreach ($shell in $allShells) {
     $targetDir = $shell.Dir
     
-    Write-Host "  Installing to $($shell.Name) ($targetDir)..." -ForegroundColor Yellow
+    Write-Host "  Installing to $($shell.Name)..." -ForegroundColor Yellow
     
     if (-not (Test-Path $targetDir)) {
         New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
@@ -143,22 +139,16 @@ foreach ($shell in $allShells) {
     $hostProfile = Join-Path $targetDir "Microsoft.PowerShell_profile.ps1"
     $srcDir = Join-Path $targetDir "src"
     
-    if (-not (Test-Path $profilePath)) {
-        New-Item -Path $profilePath -Type File -Force | Out-Null
-    }
+    New-Item -Path $profilePath -Type File -Force | Out-Null
     Set-Content -Path $profilePath -Value $profileContent -Encoding UTF8
     
-    if (-not (Test-Path $hostProfile)) {
-        New-Item -Path $hostProfile -Type File -Force | Out-Null
-    }
+    New-Item -Path $hostProfile -Type File -Force | Out-Null
     Set-Content -Path $hostProfile -Value $profileContent -Encoding UTF8
     
     if (Test-Path $srcDir) { Remove-Item -Path $srcDir -Recurse -Force }
     Copy-Item -Path (Join-Path $InstallDir "src") -Destination $srcDir -Recurse -Force
     
-    Write-Host "    [OK] profile.ps1" -ForegroundColor Green
-    Write-Host "    [OK] Microsoft.PowerShell_profile.ps1" -ForegroundColor Green
-    Write-Host "    [OK] src/ folder" -ForegroundColor Green
+    Write-Host "    [OK] profile.ps1, src/" -ForegroundColor Green
 }
 
 $configDir = "$env:USERPROFILE\.config"
@@ -172,10 +162,25 @@ if (Test-Path $starshipSource) {
 
 Write-Host ""
 Write-Host "[INFO] Installing dependencies..." -ForegroundColor Cyan
-Install-IfNeeded -Name "git" -WingetId "Git.Git"
-Install-IfNeeded -Name "starship" -WingetId "Starship.Starship"
-Install-IfNeeded -Name "zoxide" -WingetId "ajeetdsouza.zoxide"
-try { Install-Module -Name Terminal-Icons -Repository PSGallery -Force 2>&1 | Out-Null } catch { }
+
+$deps = @(
+    @{Name="starship"; Id="Starship.Starship"},
+    @{Name="zoxide"; Id="ajeetdsouza.zoxide"}
+)
+
+foreach ($dep in $deps) {
+    Install-IfNeeded -Name $dep.Name -WingetId $dep.Id
+}
+
+Write-Host "  Installing Terminal-Icons module..." -ForegroundColor Cyan
+try { 
+    if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
+        Install-Module -Name Terminal-Icons -Repository PSGallery -Force 2>&1 | Out-Null
+        Write-Host "  [OK] Terminal-Icons installed" -ForegroundColor Green
+    } else {
+        Write-Host "  [SKIP] Terminal-Icons already installed" -ForegroundColor Gray
+    }
+} catch { }
 
 Write-Host ""
 Write-Host "[INFO] Installing fonts..." -ForegroundColor Cyan
@@ -183,13 +188,52 @@ Install-Font
 Set-WindowsTerminalFont
 
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
-Write-Host "[SUCCESS] Installation Complete!" -ForegroundColor Green
-Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host "═════════════════════════════════════════════════════════════" -ForegroundColor Green
+Write-Host "[SUCCESS] FULL INSTALLATION COMPLETE!" -ForegroundColor Green
+Write-Host "═════════════════════════════════════════════════════════════" -ForegroundColor Green
 Write-Host ""
 Write-Host "Installed to:" -ForegroundColor Cyan
 Write-Host "  - Documents\PowerShell\" -ForegroundColor White
 Write-Host "  - Documents\WindowsPowerShell\" -ForegroundColor White
 Write-Host ""
-Write-Host "Restart PowerShell or: . `$PROFILE" -ForegroundColor Cyan
+Write-Host "Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
+Write-Host ""
+
+function Get-Help {
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "Available Commands:" -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "Navigation:" -ForegroundColor White
+    Write-Host "  mkcd <dir>  - Make dir and cd" -ForegroundColor Gray
+    Write-Host "  back       - Go back" -ForegroundColor Gray
+    Write-Host "  cddesk     - Go to Desktop" -ForegroundColor Gray
+    Write-Host "  cddl      - Go to Downloads" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Git:" -ForegroundColor White
+    Write-Host "  gcap <msg> - Add, commit, push" -ForegroundColor Gray
+    Write-Host "  gcom      - Add, commit" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Files:" -ForegroundColor White
+    Write-Host "  backup <f> - Backup file" -ForegroundColor Gray
+    Write-Host "  extract <f> - Extract archive" -ForegroundColor Gray
+    Write-Host "  touch <f>  - Create file" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Tools:" -ForegroundColor White
+    Write-Host "  sysinfo    - System info (fastfetch)" -ForegroundColor Gray
+    Write-Host "  genpass   - Generate password" -ForegroundColor Gray
+    Write-Host "  myip     - Show IP" -ForegroundColor Gray
+    Write-Host "  weather  - Show weather" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Docker:" -ForegroundColor White
+    Write-Host "  dps, dpa, dimg, dlogs, dex" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Kubernetes:" -ForegroundColor White
+    Write-Host "  k, kgp, kgs, kd, kl, kex, ka" -ForegroundColor Gray
+    Write-Host "" -ForegroundColor White
+    Write-Host "Mode:" -ForegroundColor White
+    Write-Host "  chmode [minimal|standard]" -ForegroundColor Gray
+    Write-Host "========================================" -ForegroundColor Cyan
+}
+
+Get-Help
 Write-Host ""

@@ -68,7 +68,7 @@ function Install-IfNeeded {
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       POWERCONFIG INSTALLER v6.2                   ║" -ForegroundColor Cyan
+Write-Host "║       POWERCONFIG INSTALLER v6.3                   ║" -ForegroundColor Cyan
 Write-Host "╚═══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
@@ -103,11 +103,22 @@ Write-Host "[INFO] Installing profiles..." -ForegroundColor Cyan
 
 $escapedInstallDir = $InstallDir -replace '\\', '\\'
 
-$profileContent = Get-Content $repoProfile -Raw
+$profileContent = @"
+# PowerConfig Profile v6.3
+`$env:POWERCONFIG_DIR = `"$escapedInstallDir`"
 
-$profileContent = $profileContent -replace '\$env:POWERCONFIG_DIR\s*=\s*\$PSScriptRoot', "`$env:POWERCONFIG_DIR = `"$escapedInstallDir`""
+# Add starship to PATH
+`$starshipBin = `"`$env:ProgramFiles\starship\bin`"
+if ((Test-Path `$starshipBin) -and (`$env:Path -notlike `"*`$starshipBin*`")) {
+    `$env:Path = `"`$starshipBin;`$env:Path`"
+}
 
-$profileContent = $profileContent -replace '\$env:STARSHIP_CONFIG\s*=\s*Join-Path.*\.config', "`$env:STARSHIP_CONFIG = Join-Path (`$env:USERPROFILE) `.config\starship.toml`""
+# Source main profile (skips src loading to avoid errors in Windows PowerShell 5.1)
+`$mainProfile = Join-Path (`$env:POWERCONFIG_DIR) `"Microsoft.PowerShell_profile.ps1`"
+if (Test-Path `$mainProfile) {
+    . `$mainProfile
+}
+"@
 
 Write-Host "[DEBUG] Modified profile content" -ForegroundColor Yellow
 

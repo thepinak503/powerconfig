@@ -1,10 +1,5 @@
 # PowerConfig Windows-Specific
-# Windows utilities, shortcuts, and system functions
-
 # Only load on Windows
-if (-not ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6))) {
-    return
-}
 
 # Ensure TLS 1.2 for web requests
 if (-not ([Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtocolType]::Tls12)) {
@@ -12,13 +7,11 @@ if (-not ([Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtoco
 }
 
 #region Windows System Shortcuts
-Set-Alias -Name explorer -Value explorer.exe
-Set-Alias -Name notepad -Value notepad.exe
-Set-Alias -Name calc -Value calc.exe
-Set-Alias -Name mspaint -Value mspaint.exe
-Set-Alias -Name taskmgr -Value taskmgr.exe
-Set-Alias -Name cmd -Value cmd.exe
-Set-Alias -Name wt -Value wt.exe
+Set-Alias -Name explorer -Value explorer.exe -ErrorAction SilentlyContinue
+Set-Alias -Name calc -Value calc.exe -ErrorAction SilentlyContinue
+Set-Alias -Name mspaint -Value mspaint.exe -ErrorAction SilentlyContinue
+Set-Alias -Name taskmgr -Value taskmgr.exe -ErrorAction SilentlyContinue
+Set-Alias -Name wt -Value wt.exe -ErrorAction SilentlyContinue
 
 # Control Panel Applets
 function appwiz { control appwiz.cpl }
@@ -54,16 +47,16 @@ function devmode { shell:AppsFolder\Microsoft.Windows.DevHome_8wekyb3d8bbwe!App 
 #endregion
 
 #region File System
-function hosts { notepad C:\Windows\System32\drivers\etc\hosts }
-function desktop { Set-Location $env:USERPROFILE\Desktop }
-function documents { Set-Location $env:USERPROFILE\Documents }
-function downloads { Set-Location $env:USERPROFILE\Downloads }
-function pictures { Set-Location $env:USERPROFILE\Pictures }
-function videos { Set-Location $env:USERPROFILE\Videos }
-function music { Set-Location $env:USERPROFILE\Music }
-function startup { Set-Location "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
-function programs { Set-Location "C:\ProgramData\Microsoft\Windows\Start Menu\Programs" }
-function temp { Set-Location $env:TEMP }
+function hosts-file { notepad C:\Windows\System32\drivers\etc\hosts }
+function goto-desktop { Set-Location $env:USERPROFILE\Desktop }
+function goto-documents { Set-Location $env:USERPROFILE\Documents }
+function goto-downloads { Set-Location $env:USERPROFILE\Downloads }
+function goto-pictures { Set-Location $env:USERPROFILE\Pictures }
+function goto-videos { Set-Location $env:USERPROFILE\Videos }
+function goto-music { Set-Location $env:USERPROFILE\Music }
+function goto-startup { Set-Location "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup" }
+function goto-programs { Set-Location "C:\ProgramData\Microsoft\Windows\Start Menu\Programs" }
+function goto-temp { Set-Location $env:TEMP }
 
 # Recycle Bin
 function emptytrash { Clear-RecycleBin -Force }

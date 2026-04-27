@@ -3,41 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerConfig Docs</title>
+    <title>PowerConfig - Home</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="minimal">
+<body>
+    <nav class="sidebar">
+        <div class="logo"><span class="icon">&#9889;</span><span class="text">PowerConfig</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="navigation.html">Navigation</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="git.html">Git</a></li>
+            <li><a href="docker.html">Docker</a></li>
+            <li><a href="kubernetes.html">Kubernetes</a></li>
+            <li><a href="system.html">System</a></li>
+            <li><a href="dev.html">Dev</a></li>
+            <li><a href="utils.html">Utils</a></li>
+        </ul>
+        <div class="install-box">
+            <code>irm https://bit.ly/pc-install | iex</code>
+        </div>
+    </nav>
     
-    <div class="container">
-        <header>
-            <h1>PowerConfig</h1>
-            <p>Performance-focused PowerShell suite.</p>
+    <main class="content">
+        <header class="page-header">
+            <h1>&#9889; PowerConfig</h1>
+            <p class="tagline">The Ultimate PowerShell Experience</p>
         </header>
-
-        <section class="install">
-            <code>irm https://raw.githubusercontent.com/thepinak503/powerconfig/main/install/install.ps1 | iex</code>
+        
+        <section class="hero">
+            <h2>Ultra PowerShell Config</h2>
+            <p>Optimized for performance, productivity, and developer workflows.</p>
         </section>
-
-        <section class="search">
-            <input type="text" id="cmd-search" placeholder="Filter commands...">
+        
+        <section class="features">
+            <div class="feature">
+                <h3>&#128640; Fast</h3>
+                <p>Optimized for minimal startup delay.</p>
+            </div>
+            <div class="feature">
+                <h3>&#128736; Ultimate</h3>
+                <p>All features always loaded.</p>
+            </div>
+            <div class="feature">
+                <h3>&#128230; Modular</h3>
+                <p>Separated functions and aliases.</p>
+            </div>
+            <div class="feature">
+                <h3>&#127760; Cross-Platform</h3>
+                <p>Works on Windows, Linux, macOS.</p>
+            </div>
         </section>
+        
+        <section class="quick-start">
+            <h2>Quick Start</h2>
+            <pre><code># Install
+irm https://bit.ly/pc-install | iex
 
-        <table id="cmd-table">
-            <thead>
-                <tr>
-                    <th>Command</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
+# Or clone manually
+git clone https://github.com/thepinak503/powerconfig.git $env:USERPROFILE\.powerconfig
+. "$env:USERPROFILE\.powerconfig\Microsoft.PowerShell_profile.ps1"</code></pre>
+        </section>
+        
+        <section class="key-commands">
+            <h2>Key Commands</h2>
+            <table>
+                <thead>
+                    <tr><th>Command</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>Show-Help</code></td><td>Display all commands</td></tr>
+                    <tr><td><code>dottools</code></td><td>Show tool status</td></tr>
+                    <tr><td><code>sysinfo</code></td><td>System info</td></tr>
+                    <tr><td><code>winutil</code></td><td>Windows utility</td></tr>
+                    <tr><td><code>Update-PowerConfig</code></td><td>Update config</td></tr>
+                </tbody>
+            </table>
+        </section>
+        
         <footer>
-            <p><a href="https://github.com/thepinak503/powerconfig">GitHub Repository</a></p>
+            <p>PowerConfig</p>
         </footer>
-    </div>
-
+    </main>
+    
     <script src="script.js"></script>
 </body>
 </html>

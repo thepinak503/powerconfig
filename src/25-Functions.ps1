@@ -12,21 +12,15 @@ function mkcd {
     New-Item -ItemType Directory -Path $Path -Force | Out-Null
     Set-Location -Path $Path
 }
-Set-Alias -Name mkcd -Value mkcd
 
 function back {
     if ($OLDPWD) { Set-Location $OLDPWD }
 }
-Set-Alias -Name back -Value back
 
-function cddesk { Set-Location $HOME\Desktop }
-function cddl { Set-Location $HOME\Downloads }
-function cddocs { Set-Location $HOME\Documents }
-function cdDEV { Set-Location "$HOME\Documents\dev" }
-Set-Alias -Name cddesk -Value cddesk
-Set-Alias -Name cddl -Value cddl
-Set-Alias -Name cddocs -Value cddocs
-Set-Alias -Name cddev -Value cdDEV
+function cd-desk { Set-Location $HOME\Desktop }
+function cd-dl { Set-Location $HOME\Downloads }
+function cd-docs { Set-Location $HOME\Documents }
+function cd-dev { Set-Location "$HOME\Documents\dev" }
 
 # -----------------------------------------------------------------------------
 # FILE OPERATIONS
@@ -40,7 +34,7 @@ function backup {
     )
     if (-not (Test-Path $Path)) { Write-Host "[ERROR] File not found: $Path" -ForegroundColor Red; return }
     
-    $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
+    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
     $name = Split-Path $Path -Leaf
     $ext = [System.IO.Path]::GetExtension($name)
     $base = [System.IO.Path]::GetFileNameWithoutExtension($name)
@@ -53,10 +47,10 @@ function backup {
     }
     
     Copy-Item -Path $Path -Destination $backupPath
-    Write-Host "[OK] Backed up to: $backupPath" -ForegroundColor Green
+    Write-Host "[OK] Backed up: $backupPath" -ForegroundColor Green
     return $backupPath
 }
-Set-Alias -Name backup -Value backup
+
 Set-Alias -Name bak -Value backup
 
 function extract {
@@ -98,7 +92,7 @@ function extract {
         }
     }
 }
-Set-Alias -Name extract -Value extract
+
 Set-Alias -Name unpack -Value extract
 
 function swap {
@@ -118,13 +112,12 @@ function swap {
     
     Write-Host "[OK] Swapped: $File1 <-> $File2" -ForegroundColor Green
 }
-Set-Alias -Name swap -Value swap
 
 # -----------------------------------------------------------------------------
 # SHELL MANAGEMENT
 # -----------------------------------------------------------------------------
 
-function reload {
+function reload-profile {
     $PROFILE = if ($PSVersionTable.PSEdition -eq "Core") {
         "$HOME\Documents\PowerShell\profile.ps1"
     } else {
@@ -133,11 +126,12 @@ function reload {
     . $PROFILE
     Write-Host "[OK] Profile reloaded!" -ForegroundColor Green
 }
-Set-Alias -Name reload -Value reload
 
-function touch {
+Set-Alias -Name reload -Value reload-profile
+
+function touch-file {
     param([string]$Path)
-    if (-not $Path) { Write-Host "Usage: touch "; return }
+    if (-not $Path) { Write-Host "Usage: touch-file "; return }
     $dir = Split-Path $Path -Parent
     if ($dir -and -not (Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
@@ -148,10 +142,9 @@ function touch {
         (Get-Item $Path).LastWriteTime = Get-Date
     }
 }
-Set-Alias -Name touch -Value touch
 
 # -----------------------------------------------------------------------------
-# GIT SHORTCUTS (Lazy workflow)
+# GIT SHORTCUTS
 # -----------------------------------------------------------------------------
 
 function gcap {
@@ -161,13 +154,11 @@ function gcap {
     git commit -m $Message
     git push
 }
-Set-Alias -Name gcap -Value gcap
 
 function gcom {
     git add -A
     git commit -m "update"
 }
-Set-Alias -Name gcom -Value gcom
 
 # -----------------------------------------------------------------------------
 # SYSTEM INFO
@@ -180,7 +171,7 @@ function sysinfo {
         Write-Host "Install fastfetch for system info" -ForegroundColor Yellow
     }
 }
-Set-Alias -Name sysinfo -Value sysinfo
+
 Set-Alias -Name neofetch -Value sysinfo
 
 # -----------------------------------------------------------------------------
@@ -193,7 +184,6 @@ function myip {
     Write-Host "IPv4: $ipv4" -ForegroundColor Cyan
     Write-Host "IPv6: $ipv6" -ForegroundColor Cyan
 }
-Set-Alias -Name myip -Value myip
 
 function weather {
     param([string]$Location = "")
@@ -204,7 +194,6 @@ function weather {
         Write-Host "[ERROR] Could not fetch weather" -ForegroundColor Red
     }
 }
-Set-Alias -Name weather -Value weather
 
 # -----------------------------------------------------------------------------
 # DOCKER SHORTCUTS
@@ -213,13 +202,8 @@ Set-Alias -Name weather -Value weather
 function dps { docker ps }
 function dpa { docker ps -a }
 function dimg { docker images }
-function dlogs { docker logs -f }
-function dex { docker exec -it }
-Set-Alias -Name dps -Value dps
-Set-Alias -Name dpa -Value dpa
-Set-Alias -Name dimg -Value dimg
-Set-Alias -Name dlogs -Value dlogs
-Set-Alias -Name dex -Value dex
+function dlog { docker logs -f }
+function dexec { docker exec -it }
 
 # -----------------------------------------------------------------------------
 # KUBERNETES SHORTCUTS
@@ -231,20 +215,10 @@ function kgs { kubectl get svc }
 function kgd { kubectl get deployments }
 function kga { kubectl get all }
 function kd { kubectl describe }
-function kl { kubectl logs -f }
+function klog { kubectl logs -f }
 function kex { kubectl exec -it }
 function ka { kubectl apply -f }
 function kr { kubectl delete }
-Set-Alias -Name k -Value k
-Set-Alias -Name kgp -Value kgp
-Set-Alias -Name kgs -Value kgs
-Set-Alias -Name kgd -Value kgd
-Set-Alias -Name kga -Value kga
-Set-Alias -Name kd -Value kd
-Set-Alias -Name kl -Value kl
-Set-Alias -Name kex -Value kex
-Set-Alias -Name ka -Value ka
-Set-Alias -Name kr -Value kr
 
 # -----------------------------------------------------------------------------
 # QUICK EDITORS
@@ -254,10 +228,6 @@ function evim { nvim $HOME/.vimrc }
 function ebash { nvim $HOME/.bashrc }
 function eprofile { nvim $PROFILE }
 function egit { nvim $HOME/.gitconfig }
-Set-Alias -Name evim -Value evim
-Set-Alias -Name ebash -Value ebash
-Set-Alias -Name eprofile -Value eprofile
-Set-Alias -Name egit -Value egit
 
 # -----------------------------------------------------------------------------
 # UTILITIES
@@ -280,7 +250,6 @@ function killport {
         Write-Host "[INFO] No process on port $Port" -ForegroundColor Yellow
     }
 }
-Set-Alias -Name killport -Value killport
 
 function timer {
     param([string]$Command)
@@ -289,21 +258,19 @@ function timer {
     $sw.Stop()
     Write-Host "Time: $($sw.ElapsedMilliseconds)ms" -ForegroundColor Cyan
 }
-Set-Alias -Name timer -Value timer
 
 function trash {
     param([string]$Path)
-    if (-not $Path) { Write-Host "Usage: trash "; return }
+    if (-not $Path) { Write-Host "Usage: trash <path>"; return }
     if (Test-Path $Path) {
         $shell = New-Object -ComObject Shell.Application
         $item = $shell.Namespace(0).ParseName($Path)
         $item.InvokeVerb("delete")
     }
 }
-Set-Alias -Name trash -Value trash
 
 # -----------------------------------------------------------------------------
-# DOTFILES MODE SYSTEM (like thepinak503/dotfiles)
+# DOTFILES MODE SYSTEM
 # -----------------------------------------------------------------------------
 function chmode {
     param(
@@ -322,19 +289,14 @@ function chmode {
 # Quick directory jumping
 function cdp { Set-Location "$env:USERPROFILE\Documents\projects" }
 function cdcode { Set-Location "$env:USERPROFILE\Documents\code" }
-Set-Alias -Name cdp -Value cdp
-Set-Alias -Name cdcode -Value cdcode
 
-# Docker full aliases
+# Docker full
 function d { docker @args }
 function dbuild { docker build -t $args[0] . }
 function dclean { docker system prune -af }
 function dprune { docker system prune -f }
-Set-Alias -Name dbuild -Value dbuild
-Set-Alias -Name dclean -Value dclean
-Set-Alias -Name dprune -Value dprune
 
-# Git functions (like thepinak503/dotfiles)
+# Git functions
 function ga { git add @args }
 function gs { git status }
 function gc { git commit -m @args }
@@ -348,33 +310,18 @@ function gm { git merge }
 function gr { git rebase }
 function gst { git stash }
 function gl { git log }
-function gb { git branch }
 
 # Kubernetes full functions
 function kgall { kubectl get all }
-function kga { kubectl get all --all-namespaces }
 function kdelp { kubectl delete pod @args }
-function klogs { kubectl logs -f @args }
-function kex { kubectl exec -it @args }
 function kpf { kubectl port-forward @args }
-Set-Alias -Name kgall -Value kgall
-Set-Alias -Name kga -Value kga
-Set-Alias -Name kdelp -Value kdelp
-Set-Alias -Name klogs -Value klogs
-Set-Alias -Name kex -Value kex
-Set-Alias -Name kpf -Value kpf
 
-# Terraform aliases
+# Terraform
 function tf { terraform @args }
 function tfi { terraform init }
 function tfp { terraform plan }
 function tfa { terraform apply }
 function tfd { terraform destroy }
-Set-Alias -Name tf -Value tf
-Set-Alias -Name tfi -Value tfi
-Set-Alias -Name tfp -Value tfp
-Set-Alias -Name tfa -Value tfa
-Set-Alias -Name tfd -Value tfd
 
 # NPM shortcuts
 function npi { npm install }
@@ -384,13 +331,9 @@ function nrt { npm run test }
 function nrd { npm run dev }
 function ns { npm start }
 function nt { npm test }
-function nd { npm run dev }
 
 # Search functions
 function ff { Get-ChildItem -Recurse -Filter "*$args[0]*" | Select-Object FullName }
 function ffr { Get-ChildItem -Recurse -File | Select-String $args[0] | Select-Object Filename, LineNumber }
-Set-Alias -Name ff -Value ff
-Set-Alias -Name ffr -Value ffr
 
-# Mega Functions loaded!
 Write-Host "[OK] MegaFunctions loaded" -ForegroundColor Green

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerConfig - Kubernetes</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo"><span class="icon">⚡</span><span class="text">PowerConfig</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="navigation.html">Navigation</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="git.html">Git</a></li>
+            <li><a href="docker.html">Docker</a></li>
+            <li><a href="kubernetes.html" class="active">Kubernetes</a></li>
+            <li><a href="system.html">System</a></li>
+            <li><a href="dev.html">Dev</a></li>
+            <li><a href="utils.html">Utils</a></li>
+        </ul>
+    </nav>
+    <main class="content">
+        <header class="page-header"><h1>Kubernetes Commands</h1></header>
+        <section><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>k</code></td><td>kubectl</td></tr>
+<tr><td><code>kg</code></td><td>kubectl get</td></tr>
+<tr><td><code>kga</code></td><td>kubectl get all</td></tr>
+<tr><td><code>kgp</code></td><td>kubectl get pods</td></tr>
+<tr><td><code>kgs</code></td><td>kubectl get svc</td></tr>
+<tr><td><code>kgd</code></td><td>kubectl get deployments</td></tr>
+<tr><td><code>kgn</code></td><td>kubectl get nodes</td></tr>
+<tr><td><code>kns &lt;ns&gt;</code></td><td>kubectl set namespace</td></tr>
+<tr><td><code>kctx</code></td><td>kubectl current-context</td></tr>
+<tr><td><code>kuse &lt;ctx&gt;</code></td><td>kubectl use-context</td></tr>
+<tr><td><code>kd</code></td><td>kubectl describe</td></tr>
+<tr><td><code>kdp &lt;pod&gt;</code></td><td>kubectl describe pod</td></tr>
+<tr><td><code>kl</code></td><td>kubectl logs</td></tr>
+<tr><td><code>klf &lt;pod&gt;</code></td><td>kubectl logs -f</td></tr>
+<tr><td><code>kex</code></td><td>kubectl exec -it</td></tr>
+<tr><td><code>ka</code></td><td>kubectl apply -f</td></tr>
+<tr><td><code>kdel</code></td><td>kubectl delete</td></tr>
+<tr><td><code>kdf</code></td><td>kubectl delete -f</td></tr>
+<tr><td><code>kpf</code></td><td>kubectl port-forward</td></tr>
+<tr><td><code>krun</code></td><td>kubectl run</td></tr>
+        </tbody></table></section>
+    </main>
+</body>
+</html>

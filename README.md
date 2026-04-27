@@ -1,37 +1,39 @@
 # PowerConfig
 
-A modular PowerShell configuration suite focused on performance and domain-driven design.
+The Ultimate PowerShell Experience - Ultra config with all features.
 
-## Installation
+## Install
 
 ```powershell
-irm https://raw.githubusercontent.com/thepinak503/powerconfig/main/install/install.ps1 | iex
+irm https://bit.ly/pc-install | iex
+```
+
+Or clone manually:
+```powershell
+git clone https://github.com/thepinak503/powerconfig.git $env:USERPROFILE\.powerconfig
+. "$env:USERPROFILE\.powerconfig\Microsoft.PowerShell_profile.ps1"
 ```
 
 ## Structure
 
-Modular architecture using a numbered loading sequence in the `src/` directory.
+- `src/00-Functions.ps1` - All functions (no tiers!)
+- `src/00-Aliases.ps1` - All aliases
+- `Microsoft.PowerShell_profile.ps1` - Entry point
 
-- `src/00-Init.ps1`: Performance tuning & initialization.
-- `src/10-Environment.ps1`: Paths and Global variables.
-- `src/20-Aliases.ps1`: Semantic alias grid (Git, Docker, K8s).
-- `src/30-Standard.ps1`: UNIX utilities (sed, grep, head, etc).
-- `src/50-MegaSuite.ps1`: Advanced tools for Net, Media, and Security.
-- `src/70-Theme.ps1`: Starship & Tokyo Night integration.
+## Key Commands
 
-## Key Features
+| Command | Description |
+|---------|-----------|
+| `Show-Help` | Display all commands |
+| `dottools` | Show tool status |
+| `sysinfo` | System info (fastfetch) |
+| `winutil` | Windows utility |
+| `Update-PowerConfig` | Update config |
 
-- **Modular**: Bash-style sourcing for clean organization.
-- **Fast**: Optimized for minimal startup delay.
-- **Tools**: Integrated wrappers for FFmpeg, ImageMagick, and networking tasks.
-- **Aliases**: Consistent shortcut logic for modern CLI tools.
+## Run Docs
 
-## Documentation
-
-Full command reference available via the local documentation site:
 ```powershell
 Show-PowerDocs
 ```
 
----
-[thepinak503/powerconfig](https://github.com/thepinak503/powerconfig)
+Or open `docs/index.html` in browser.

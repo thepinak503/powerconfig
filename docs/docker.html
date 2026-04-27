@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerConfig - Docker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo"><span class="icon">⚡</span><span class="text">PowerConfig</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="navigation.html">Navigation</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="git.html">Git</a></li>
+            <li><a href="docker.html" class="active">Docker</a></li>
+            <li><a href="kubernetes.html">Kubernetes</a></li>
+            <li><a href="system.html">System</a></li>
+            <li><a href="dev.html">Dev</a></li>
+            <li><a href="utils.html">Utils</a></li>
+        </ul>
+    </nav>
+    <main class="content">
+        <header class="page-header"><h1>Docker Commands</h1></header>
+        <section><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>d</code></td><td>docker</td></tr>
+<tr><td><code>dps</code></td><td>docker ps</td></tr>
+<tr><td><code>dpa</code></td><td>docker ps -a</td></tr>
+<tr><td><code>di</code></td><td>docker images</td></tr>
+<tr><td><code>dimg</code></td><td>docker images</td></tr>
+<tr><td><code>dex &lt;container&gt;</code></td><td>docker exec -it</td></tr>
+<tr><td><code>dexsh &lt;container&gt;</code></td><td>docker exec -it sh</td></tr>
+<tr><td><code>dlogs &lt;container&gt;</code></td><td>docker logs -f</td></tr>
+<tr><td><code>dstop</code></td><td>docker stop</td></tr>
+<tr><td><code>dstart</code></td><td>docker start</td></tr>
+<tr><td><code>drm</code></td><td>docker rm</td></tr>
+<tr><td><code>drmi</code></td><td>docker rmi</td></tr>
+<tr><td><code>dprune</code></td><td>docker system prune -af</td></tr>
+<tr><td><code>dclean</code></td><td>docker system prune -af --volumes</td></tr>
+<tr><td><code>dbuild &lt;tag&gt;</code></td><td>docker build -t</td></tr>
+<tr><td><code>drun &lt;image&gt;</code></td><td>docker run -it --rm</td></tr>
+<tr><td><code>dtop</code></td><td>docker stats</td></tr>
+<tr><td><code>dc</code></td><td>docker-compose</td></tr>
+<tr><td><code>dcu</code></td><td>docker-compose up</td></tr>
+<tr><td><code>dcud</code></td><td>docker-compose up -d</td></tr>
+<tr><td><code>dcd</code></td><td>docker-compose down</td></tr>
+<tr><td><code>dcr</code></td><td>docker-compose restart</td></tr>
+        </tbody></table></section>
+    </main>
+</body>
+</html>

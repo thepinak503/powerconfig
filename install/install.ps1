@@ -1,39 +1,48 @@
-# =============================================================================
-# PowerConfig Universal Installer
-# Run: iwr https://is.gd/powerconfig | iex
-# =============================================================================
+$ErrorActionPreference = "Continue"
+if (-not $IsWindows) { Write-Host "PowerConfig is Windows-only." -ForegroundColor Yellow; exit 0 }
 
-$ErrorActionPreference = 'Stop'
+if (-not ([Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtocolType]::Tls12)) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+}
 
-$pcDir = "$env:USERPROFILE\.powerconfig"
-$profilePath = "$pcDir\Microsoft.PowerShell_profile.ps1"
+$RepoUrl = "https://github.com/thepinak503/powerconfig"
+$InstallDir = "$env:USERPROFILE\Documents\Git\powerconfig"
 
-Write-Host "Installing PowerConfig..." -ForegroundColor Cyan
+Write-Host "+--------------------------------------------+" -ForegroundColor Cyan
+Write-Host "|       POWERCONFIG INSTALLER                |" -ForegroundColor Cyan
+Write-Host "+--------------------------------------------+" -ForegroundColor Cyan
 
-if (Test-Path $pcDir) {
-    Write-Host "Updating existing installation..." -ForegroundColor Yellow
-    Set-Location $pcDir
-    git pull origin main 2>$null
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing Git..." -ForegroundColor Yellow
+    winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null
+}
+
+if (-not (Test-Path $InstallDir)) {
+    $parent = Split-Path $InstallDir -Parent
+    if (-not (Test-Path $parent)) { New-Item -Path $parent -ItemType Directory -Force | Out-Null }
+    Write-Host "Cloning PowerConfig..." -ForegroundColor Cyan
+    git clone --depth=1 $RepoUrl $InstallDir 2>&1 | Out-Null
 } else {
-    Write-Host "Cloning repository..." -ForegroundColor Yellow
-    git clone https://github.com/thepinak503/powerconfig.git $pcDir
+    Write-Host "Updating PowerConfig..." -ForegroundColor Cyan
+    git -C $InstallDir pull 2>&1 | Out-Null
 }
 
-Write-Host "Setting up profile..." -ForegroundColor Cyan
+$profileContent = @"
+`$env:POWERCONFIG_DIR = `"$InstallDir`"
+. (Join-Path `$env:POWERCONFIG_DIR `"Microsoft.PowerShell_profile.ps1`")
+"@
 
-$profileDir = "$env:USERPROFILE\Documents\WindowsPowerShell"
-if (-not (Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+$targets = @(
+    @{Name="PowerShell 7+"; Dir="$env:USERPROFILE\Documents\PowerShell"},
+    @{Name="PowerShell 5.1"; Dir="$env:USERPROFILE\Documents\WindowsPowerShell"}
+)
+
+foreach ($t in $targets) {
+    if (-not (Test-Path $t.Dir)) { New-Item -Path $t.Dir -ItemType Directory -Force | Out-Null }
+    $profilePath = Join-Path $t.Dir "Microsoft.PowerShell_profile.ps1"
+    Set-Content -Path $profilePath -Value $profileContent -Encoding UTF8
+    Write-Host "  [OK] $($t.Name)" -ForegroundColor Green
 }
 
-$destProfile = "$profileDir\profile.ps1"
-if (-not (Test-Path $destProfile)) {
-    @"
-. `"$env:USERPROFILE\.powerconfig\Microsoft.PowerShell_profile.ps1`
-"@ | Out-File -FilePath $destProfile -Encoding UTF8
-    Write-Host "Profile created at: $destProfile" -ForegroundColor Green
-} else {
-    Write-Host "Profile already exists. Backup and reinstall manually." -ForegroundColor Yellow
-}
-
-Write-Host "Installation complete! Restart PowerShell." -ForegroundColor Green
+Write-Host "[OK] Installation complete!" -ForegroundColor Green
+Write-Host "Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan

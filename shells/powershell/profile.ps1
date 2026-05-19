@@ -1,1 +1,0 @@
-. (Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) "Microsoft.PowerShell_profile.ps1")

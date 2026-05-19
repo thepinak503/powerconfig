@@ -1,134 +1,143 @@
-# =============================================================================
-# STARSHIP PROMPT - Ultimate Tokyo Night Configuration
-# =============================================================================
-
 "$schema" = 'https://starship.rs/config-schema.json'
+command_timeout = 500
+scan_timeout = 30
+add_newline = true
+follow_symlinks = true
+
 format = """
-[░▒▓](#c0caf5)\
-[  ](bg:#7aa2f7 fg:#1a1b26)\
-[](bg:#9ece6a fg:#7aa2f7)\
+[](fg:#a3aed2)\
+$username\
+$hostname\
+[  ](bg:#a3aed2 fg:#090c0c)\
+[](bg:#769ff0 fg:#a3aed2)\
 $directory\
-[](fg:#9ece6a bg:#3d59a1)\
+[](fg:#769ff0 bg:#394260)\
 $git_branch\
-$git_commit\
 $git_status\
-[](fg:#3d59a1 bg:#24283b)\
+[](fg:#394260 bg:#212736)\
 $python\
 $rust\
 $golang\
 $nodejs\
-$java\
-$package\
+$dotnet\
+$terraform\
 $docker_context\
 $kubernetes\
-[](fg:#24283b bg:#1f2335)\
+[](fg:#212736 bg:#1a1b26)\
 $time\
-$custom\
 $battery\
 $cmd_duration\
-[▓▒░](fg:#1f2335)\
+$line_break\
 $character"""
 
-right_format = """$shell$jobs$node_env"""
-
-add_newline = true
-scan_timeout = 10
-command_timeout = 5000
+right_format = """$shell$jobs"""
 
 [shell]
 style = "fg:#565f89"
-format = "[$symbol($version)]($style)"
-disabled = false
-unknown_symbol = "?"
+format = "[$symbol]($style)"
 
 [jobs]
 style = "fg:#565f89"
 format = "[$number]($style) "
 
 [directory]
-style = "fg:#c0caf5 bg:#7aa2f7"
+style = "fg:#c0caf5 bg:#769ff0"
 format = "[ $path ]($style)"
 truncation_length = 3
-truncation_symbol = "…/"
-home_symbol = "~/"
+truncation_symbol = "../"
 
 [directory.substitutions]
-"Documents" = " 📄"
-"Downloads" = " ⬇"
-"Music" = " 🎵"
-"Pictures" = " 🖼"
-"Videos" = " 🎬"
-"Desktop" = " 🖥"
-"Projects" = " 💼"
-"GitHub" = " 🐙"
+"Documents" = " Docs"
+"Downloads" = " Dloads"
+"Desktop" = " Desktop"
+"Pictures" = " Pics"
+"Music" = " Music"
+"Videos" = " Vids"
+"Projects" = " Projects"
+"GitHub" = " GitHub"
+"source" = " src"
+"repos" = " repos"
 
 [git_branch]
-symbol = "  "
-style = "bg:#3d59a1"
+symbol = " branch "
+style = "bg:#394260"
 format = "[$symbol$branch]($style)"
 
 [git_status]
-style = "bg:#3d59a1"
+style = "bg:#394260"
 format = "[$all_status$ahead_behind]($style)"
-conflicted = " 󰞇"
-ahead = " 󰜷"
-behind = " 󰜮"
-untracked = " 󰋗"
-stashed = " 󰏗"
-modified = " 󰝶"
-staged = " 󰐖"
-renamed = " 󰑕"
-deleted = " 󰍴"
+conflicted = " conflict"
+ahead = " ahead"
+behind = " behind"
+untracked = " new"
+stashed = " stash"
+modified = " mod"
+staged = " staged"
+renamed = " renamed"
+deleted = " deleted"
 
 [python]
-symbol = " "
-style = "bg:#24283b"
-format = "[$symbol($version )](fg:#9d7cd8 bg:#24283b)"
+symbol = " py"
+style = "bg:#212736"
+format = "[$symbol($version)](fg:#9d7cd8 bg:#212736)"
+detect_extensions = ["py"]
 
 [rust]
-symbol = " 󱘗"
-style = "bg:#24283b"
-format = "[$symbol ($version)](fg:#ff9e64 bg:#24283b)"
+symbol = " rs"
+style = "bg:#212736"
+format = "[$symbol($version)](fg:#ff9e64 bg:#212736)"
+detect_extensions = ["rs"]
+
+[golang]
+symbol = " go"
+style = "bg:#212736"
+format = "[$symbol($version)](fg:#79d4f9 bg:#212736)"
+detect_extensions = ["go"]
 
 [nodejs]
-symbol = " 󰌷"
-style = "bg:#24283b"
-format = "[$symbol ($version)](fg:#9ece6a bg:#24283b)"
+symbol = " node"
+style = "bg:#212736"
+format = "[$symbol($version)](fg:#9ece6a bg:#212736)"
+detect_extensions = ["js", "ts", "jsx", "tsx"]
+
+[dotnet]
+symbol = " .NET"
+style = "bg:#212736"
+format = "[$symbol($version)](fg:#7aa2f7 bg:#212736)"
+
+[terraform]
+symbol = " tf"
+style = "bg:#212736"
+format = "[$symbol($workspace)](fg:#bb9af7 bg:#212736)"
 
 [docker_context]
-symbol = " "
-style = "bg:#24283b"
-format = "[$symbol ($context)](fg:#79d4f9 bg:#24283b)"
+symbol = " docker"
+style = "bg:#212736"
+format = "[$symbol($context)](fg:#79d4f9 bg:#212736)"
 
 [kubernetes]
-symbol = " ☸ "
-style = "bg:#24283b"
-format = "[$symbol $context]($style)"
+symbol = " k8s"
+style = "bg:#212736"
+format = "[$symbol$context]($style)"
 disabled = false
 
 [time]
 disabled = false
-time_format = "%Y-%m-%d %I:%M:%S %p"
-style = "fg:#a9b1d6 bg:#1f2335"
-format = "[ 󱑀 $time ]($style)"
+time_format = "%I:%M:%S %p"
+style = "fg:#a9b1d6 bg:#1a1b26"
+format = "[ time $time ]($style)"
 
 [battery]
 format = "[$symbol$percentage]($style)"
-full_symbol = " 󰁹"
-charging_symbol = " 󰂄"
-discharging_symbol = " 󱧒"
+full_symbol = " full "
+charging_symbol = " chg "
+discharging_symbol = " bat "
 style = "fg:#a9b1d6"
 
-[character]
-success_symbol = "[❯](bold #9ece6a)"
-error_symbol = "[✗](bold #f7768e)"
+[cmd_duration]
+format = "[ $duration ]($style)"
+style = "fg:#565f89"
 
-[custom.identity]
-command = '''
-$is_admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if ($is_admin) { "CAUTION!! you are admin!!" } else { "you are $env:USERNAME" }
-'''
-shell = ["powershell", "-Command"]
-style = "fg:#a9b1d6 bg:#1f2335"
-format = "[ $output ]($style)"
-when = "true"
+[character]
+success_symbol = "[>](bold #9ece6a)"
+error_symbol = "[x](bold #f7768e)"
